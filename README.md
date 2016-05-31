@@ -1,0 +1,2 @@
+# snidget
+Personal accounting tool
