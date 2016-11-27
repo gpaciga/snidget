@@ -10,9 +10,9 @@ you're spending.
 
 This program was written by Gregory Paciga (`gpaciga at gmail.com`)
 in his free time. Bugs, requests, and suggestions can be sent to him,
-or through the sourceforge site.
+or through GitHub.
 
-The Snidget code is hosted at `https://github.com/gpaciga/snidget`
+The Snidget code is hosted at <https://github.com/gpaciga/snidget>.
 
 The program started out being called, very creatively, "budget", then
 changed to "budgie" to sound cuter, but a finance program called
