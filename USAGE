@@ -1,12 +1,15 @@
-snidget V4.0(beta)
+snidget V4.1(beta)
 Usage: snidget.py [args]
 
 Call with no arguments to get the graphical user interface.
 
 COMMANDS are run from left to right, until either all complete or a fatal error is encountered.
-  -a          Prints the expense record, showing all records.
+  -a          Prints the full expense record, showing all records.
   -b	      Prints account balances as a function of time
+  -c          Prints all current account balances
+  -d num      Print total values of last num days for every day in range. See also -w.
   -e uid      Edit the record specified by uid. Accepts a comma separated list.
+  -g  	      Start the GUI.
   -h          Print this help.
   -i          Print an id string.
   -l	      Print a LaTeX formatted summary of expenses.
@@ -16,13 +19,15 @@ COMMANDS are run from left to right, until either all complete or a fatal error 
   -r          Print a list of recipients with balances.
   -s          Sort the database by date and save.
   -t          Print a list of types with balances.
-  -u          Downloads the online snidget entries and saves them.
+  -u	      Update the exchange rates for all currencies. Run with only "-u -o save" to commit to settings.
   -v          Same as -p, but prints only the total value of the record (or vise versa if this is default)
-  -w          Prints the total values of the last seven days for every day in range.
+  -w          Prints the total values of the last seven days for every day in range. Same as '-d 7'.
   -x uid      Delete record specified by uid. 
 
 FILTERS change what is printed, effective until the program terminates. Order might matter.
   -A acc      Print only transactions with specified account.
+  -B acc      Same as -A acc -C acc at the same time.
+  -C acc      Include only columns from the given accounts (accepts comma separated list; can be None or All)
   -D d1[,d2]  Limit records to a date range, from d1 to present or from d1 up to (not including) d2.
   -E          Include expenses only, not bills, income, transfers, or adjustments.
   -F type     Hide records of a particular type (F is for False) but print all else.

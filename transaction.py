@@ -81,7 +81,7 @@ class Transaction:
 
     def strValue(self, printID=True, wDate=10, wType=9, wDest=24, wDesc=34): 
         """ Write transaction as a string, including only the total value """
-        lineformat = "%%-%ds   %%-%ds   %%-%ds   %%-%ds   " % (wDate, wType, wDest, wDesc)
+        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
         output += "%9.2f " % self.value()
         if (printID):
@@ -97,13 +97,13 @@ class Transaction:
         if (totalValue is None):
             totalValue = self.settings.totalvalues()
 
-        lineformat = "%%-%ds   %%-%ds   %%-%ds   %%-%ds " % (wDate, wType, wDest, wDesc)
+        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
         if (totalValue):
             output += "%9.2f " % self.value()
         else:
             for acc in self.settings.accounts():
-                if acc not in self.settings.deletedAccountKeys():
+                if acc not in self.settings.deletedAccountKeys() and self.database.is_printable(acc):
                     if acc in self.deltas.keys():
                         output += "%9.2f " % self.deltas[acc]
                     else:
@@ -150,7 +150,14 @@ class Transaction:
 
     def value(self):
         """ Return total value of transaction """
-        return sum(self.deltas.values())
+        #return sum(self.deltas.values())
+        total = 0.0
+        for acc, value in self.deltas.iteritems():
+            if acc in self.settings.foreignAccountKeys():
+                total += value*self.settings.exchange(acc)
+            else:
+                total += value
+        return total
 
     def newUID(self):
         """ Generate a UID based on the current timestamp """
@@ -234,22 +241,61 @@ class Transaction:
         import readline        
         readline.parse_and_bind("tab: complete")
 
-        # Get date
-        prompt = "Date (%s): " % self.date
-        dateString = raw_input(prompt)
-        dateString = dateString.strip()
+        dateOK = False
+        
+        while not dateOK:
+    
+            # Get date
+            prompt = "Date (%s): " % self.date
+            dateString = raw_input(prompt)
+            dateString = dateString.strip()
 
-        if dateString != "":
-            from datetime import date
-            dateList = str.split(dateString,"-")
-            self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date        
-        # Otherwise date stays the same, which will be today if new transaction
+            if dateString != "":
+                from datetime import date
 
-        #! If date is more than, say, seven days ago, warn and ask again
-            # in order to avoid date typos
+                # from number of dashes, figure out what type of input we got
+                ndash = dateString.count("-")
+
+                # set the defaults
+                inputDay = self.date.day
+                inputMonth = self.date.month
+                inputYear = self.date.year
+
+                if ndash == 0:
+                    # assuming number is date only
+                    inputDay = int(dateString)
+                elif ndash == 1:
+                    dateList = str.split(dateString,"-")
+                    inputMonth = int(dateList[0])
+                    inputDay = int(dateList[1])
+                elif ndash == 2:
+                    dateList = str.split(dateString,"-")
+                    inputYear = int(dateList[0])
+                    inputMonth = int(dateList[1])
+                    inputDay = int(dateList[2])
+                else:
+                    print "ERROR: did not understand date"
+                    continue
+
+                #self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date        
+                try:
+                    self.date = date(inputYear, inputMonth, inputDay) # Transaction date
+                except:
+                    print "ERROR: could not interpret %d-%d-%d" % (inputYear, inputMonth, inputDay)
+                    continue
+
+                # Warn if entered date is a long time ago. Might be, e.g., a typo in the year.
+                if (self.settings.TODAY - self.date) > self.settings.ONEWEEK:
+                    print 'WARNING: Date entered is greater than one week ago!'
+                # Otherwise date stays the same, which will be today if new transaction
+            #endif
+        
+            # if we got past all the continues above, then the date is OK
+            dateOK = True
+
+        #endwhile
 
         # Get transaction type
-
         types = self.settings.types() # [0]=key, [1]=value
         
         # Try to complete type on tab
@@ -342,7 +388,7 @@ class Transaction:
 
         for acc, name in self.settings.accounts().iteritems():
             # Get default value for this account, if it already exists in deltas
-            if acc not in self.settings.deletedAccountKeys():
+            if acc not in self.settings.deletedAccountKeys() and self.database.is_printable(acc):
                 if acc in self.deltas:
                     value = self.deltas[acc]
                 else:
@@ -375,7 +421,11 @@ class Transaction:
         readline.parse_and_bind("tab: complete")
 
         # First get the two accounts we're transfering between
-        keys = self.settings.accountKeys()
+        allkeys = self.settings.accountKeys()
+        keys = []
+        for key in allkeys:
+            if self.database.is_printable(key):
+                keys.append(key)
         for i in range(0, len(keys)):
             optlist = "[%d] %s " % (i, self.settings.accountName(keys[i]))
             print optlist,
@@ -392,6 +442,10 @@ class Transaction:
             dest = keys[int(answer)]
             self.dest = self.settings.accountName(dest)
             
+        if dest in self.settings.foreignAccountKeys() or source in self.settings.foreignAccountKeys():
+            print "WARNING: Transfering between different currencies isn't well supported"
+            print "         You will have to edit this record with -e to adjust the values"
+
         # Try to complete destination on tab
         readline.set_completer(self.complete_desc)
 

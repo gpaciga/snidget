@@ -3,6 +3,20 @@
 ## TODO
 * make default params user editable through GUI
 * better plotter would be nice
+* manual editing of historical exchange rates would be useful if they are ever used
+
+## v4.1(beta)
+* 2010-12-02 - Added -d option. -d 1 is good for total value in each day.
+* 2011-08-08 - Added -c option for current balances
+* 2011-08-08 - Added support for foreign currency accounts (but not converting between accounts yet)
+* 2011-08-11 - Added -C option to only display some columns/accounts
+* 2011-08-11 - Added ability to save current filters as the defaults
+* 2011-08-11 - Removed support for NETARCH/NETBASE
+* 2011-08-12 - Changed -u to download all new exchange rates but will not save by default
+* 2012-01-19 - Added smarter date interpretation so can omit year or both year and month
+* 2012-09-12 - Slightly modified format of -r and -t tables
+* 2013-11-01 - Old exchange rates are saved when updated. Historical rates not used for anything.
+* 2015-08-08 - Fixed exchange rates to use a proper/better API
 	
 ## v4.0(beta)
 * 2010-10-29 - Added save database functionality to the GUI

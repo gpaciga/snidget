@@ -26,6 +26,7 @@
 #        More error checking and argument type checking
 #        Warn if removing accuont with non-zero balance
 #        When a new Type or Account code is encountered, ask for a name and save it in the options
+#        Maybe have some prediction thing, so if the first few fields are similar it'll suggest a complete record? (e.g. for monthly things)
 
 #! If you change the database to a file which does not exist, that error on loading the database will not let us get as far as the -o command to fix it!
 
@@ -38,7 +39,7 @@ import getopt # to parse command line options
 import settings
 import database
 
-__version__ = "4.0-beta"
+__version__ = "4.1-beta"
 
 # Load the user settings and database
 settings = settings.Settings()
@@ -54,17 +55,36 @@ def usage():
     return output
 # end def usage
 
+# Unused option letters:
+#  jkmqyz GHIJKMNOPQUYZ
+
 def parseArgs(argv):
     """ Process command line arguments. """
     try:
-        opts, args = getopt.getopt(argv, "abe:ghilno:prstuvwx:A:D:EF:S:L:RT:V:WX:", [])
+        opts, args = getopt.getopt(argv, "acbd:e:ghilno:prstuvwx:A:B:C:D:EF:L:RS:T:V:WX:", [])
     except getopt.GetoptError:
         print "Unrecognized option or bad argument. Use -h to get usage information."
         sys.exit(2)
     for opt, arg in opts:
+
         if opt == "-a":
             # Print all visible records, no matter how many there are
             print database.__str__(len(database.records))
+
+        elif opt == "-c":
+            # Print current balances of all accounts
+            balances = database.balances()['all']
+            total=0.0
+            for acc in settings.accounts().iterkeys():
+                if acc not in settings.deletedAccountKeys():
+                    if acc in settings.foreignAccountKeys():
+                        print "%-15s %12.2f = %12.2f" % (settings.accountName(acc), balances[acc], balances[acc]*settings.exchange(acc))
+                        total += balances[acc]*settings.exchange(acc)
+                    else:
+                        print "%-15s %12.2s   %12.2f" % (settings.accountName(acc), "", balances[acc])
+                        total += balances[acc]
+            print "%-15s %12.2s   ============" % ("", "")
+            print "%-15s %12.2s   %12.2f" % ("Total", "", total)
 
         elif opt == "-b":
             for datapoint in database.integrateDeltas():
@@ -73,6 +93,24 @@ def parseArgs(argv):
                 for i in range(0, len(settings.accounts())+1): # +1 because we have a column for the total
                     output += "%9.2f " % datapoint[1+i]
                 print output
+
+        elif opt == "-d":
+            # Integrate over n days, argument required.
+            # -d 7 is the same as -w
+            #! Should this be a function in the database class?
+            total = 0.0
+            num = 0
+            try:
+                n=int(arg)
+            except:
+                print "Invalid option: -d " + arg
+            for datapoint in database.integrate(n):
+                # datapoint is a (date, float) tuple
+                print "%s %.2f" % datapoint
+                total += float(datapoint[1])
+                num += 1
+            ave = total/num
+            print "# Average: %.2f" % ave
 
         elif opt == "-e":
             # Edit an entry identified by uid=arg
@@ -115,8 +153,12 @@ def parseArgs(argv):
 
         elif opt == "-r":
             # Print recipients
+            destsum=0.0
             for dest in database.balancesByRecipient():
-                print "%-30s %9.2f" % (dest[0], float(dest[1]))
+                destsum+=float(dest[1])
+                print "  %-35s %9.2f" % (dest[0], float(dest[1]))
+            print "  ============================================="
+            print "  %35s %9.2f" % (" ", destsum)
 
         elif opt == "-s":
             # Sort records by date
@@ -125,13 +167,22 @@ def parseArgs(argv):
 
         elif opt == "-t":
             # Print types
+            typesum=0.0
             for type in database.balancesByType():
-                print "%-30s %9.2f" % (type[0], float(type[1]))
+                typesum+=float(type[1])
+                print "  %-35s %9.2f" % (type[0], float(type[1]))
+            print "  ============================================="
+            print "  %35s %9.2f" % (" ", typesum)
+
+# NETBASE is no longer supported
+#        elif opt == "-u":
+#            # Get new records from the internet
+#            database.downloadRecords()
+#            database.save()
 
         elif opt == "-u":
-            # Get new records from the internet
-            database.downloadRecords()
-            database.save()
+            print "Updating all exchange rates from Google (but you must save explicitly with -o save!)"
+            settings.updateExchanges()
 
         elif opt == "-v":
             # Like -p but print values, not individual accounts
@@ -160,6 +211,15 @@ def parseArgs(argv):
         elif opt == "-A":
             # Print only transactions involving account arg
             database.filters['accounts'] = arg
+
+        elif opt == "-B":
+            # Print only transactions and involving account arg and only that column
+            database.filters['accounts'] = arg
+            database.filters['columns'] = arg
+
+        elif opt == "-C":
+            # Print only the given column(s)
+            database.filters['columns'] = arg
 
         elif opt == "-D":
             # Filter by date

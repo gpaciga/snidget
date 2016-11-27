@@ -21,6 +21,11 @@
 #! If deleting an account, to which no transactions are associated,
 #  we can remove it permanently
 
+#! The handling of foreign accounts could be made more consistent
+#  by making all accounts "foreign" with currency CAD and exchage 1.0
+
+#! Add a way to print the current filters alone in a nice way
+#! and to save the current filters as the default
 
 class Settings:
     """ Manage and store user settings """
@@ -33,18 +38,20 @@ class Settings:
     TODAY = date.today()
     ONEWEEK = timedelta(7)
 
+    UPDATEDRATES = False
+
     # This is the default set of options
     # These will be overwritten if settings.pkl exists
     options = {
         'DATABASE' : "expenses.txt",
-        'NETBASE' : "",
-        'NETPOST' : "",
+#        'NETBASE' : "",
+#        'NETPOST' : "",
         'MAXPRINT' : 25,           # Maximum number of records to print by default
         'ALLOWANCE' : 100,         # Basis for calculating "Remaining" total
         'TOTALVALUES' : False,     # Whether to print the total value or the value of each account
         'NPREDICT' : 6,            # Number of predictions to suggest
         'DOPREDICTDEST' : True,    # Whether to predict the destination or use the places array below
-        'NOTCHAR' : '!',           # Character used to negate strings
+        'NOTCHAR' : '#',           # Character used to negate strings
 
         # Only used if prediction of places is turned off
         # Different place options for different types?
@@ -63,6 +70,18 @@ class Settings:
         # This holds the keys of accounts which are hidden
         'deletedAccounts': [],
         
+        # Default currency of non-foreign accounts
+        'defaultCurrency' : "CAD",
+
+        # This holds the currency of foreign accounts
+        'foreignCurrencies' : {},
+
+        # Exchange rates for foreign accounts
+        'exchangeRates' : {},
+
+        # will store exchangeRates as a function of time
+        'historicalRates' : {},
+
         # Default filters are the ones used when the program first starts up
         # Each one must be a string, enclosed in single quotes, with no spaces
         # They are the same strings you would use on the command line
@@ -78,6 +97,7 @@ class Settings:
         'FILTERS' : {
             'dates':'W1',
             'accounts':None,
+            'columns':None,
             'types':None,
             'recipients':None,
             'string':None,
@@ -108,6 +128,7 @@ class Settings:
             optionsPickle = open(filename,'rb')          
             self.options = pickle.load(optionsPickle)
             optionsPickle.close()
+
             # Now go through and add any options that are new since the last save
             doSave = False
             for opt,val in defaults.iteritems():
@@ -125,6 +146,28 @@ class Settings:
                 print "Removing defunct option "+opt
                 self.options.pop(opt)
                 doSave = True
+
+            # We need to also go through the special case of the FILTERS
+            # This is basically duplicate code and could be cleaned up....
+            for filt,val in defaults['FILTERS'].iteritems():
+                if filt not in self.options['FILTERS']:
+                    print "Adding new filter "+filt
+                    self.options['FILTERS'][filt] = val
+                    doSave = True
+            delete=[]
+            for filt,val in self.options['FILTERS'].iteritems():
+                if filt not in defaults['FILTERS']:
+                    delete.append(filt)
+            for opt in delete:
+                print "Removing defunct filter "+filt
+                self.options['FILTERS'].pop(filt)
+                doSave = True
+
+            if not self.options['historicalRates']:
+                from datetime import date
+                self.options['historicalRates'][date(1970,01,01)] = self.options['exchangeRates']
+                
+
             # Settings were updated so we must save
             if doSave: self.save()
                     
@@ -140,8 +183,41 @@ class Settings:
     def __str__(self):
         """ Convert current options into string for printing """
         output = ""
-        for name, value in self.options.iteritems():
-            output += "%s = %s\n" % (name, value)
+        #for name, value in self.options.iteritems():
+        #    output += "%20s = %-40s\n" % (name, value)
+        #return output
+        tmpsettings=self.options.copy()
+
+        output += "Accounts:\n"
+        output += "%-12s %-4s %-9s %10s\n" % ("Name", "ID", "Currency", "Exchange")
+        for acc, name in tmpsettings['accounts'].iteritems():
+            if acc in tmpsettings['foreignCurrencies']:
+                currency = tmpsettings['foreignCurrencies'][acc]
+                exchange = float(tmpsettings['exchangeRates'][currency])
+            else:
+                currency = tmpsettings['defaultCurrency']
+                exchange = 1.0
+            output += "%-12s %-4s %-9s %10f" % (name, acc, currency, exchange)
+            if acc in tmpsettings['deletedAccounts']:
+                output += "   (hidden)"
+            output += "\n"
+        output += "\n"
+
+        tmpsettings.pop('accounts')
+        tmpsettings.pop('deletedAccounts')
+        tmpsettings.pop('foreignCurrencies')
+        tmpsettings.pop('exchangeRates')
+        tmpsettings.pop('defaultCurrency')
+
+        output += "Default filters applied at beginning of program:\n"
+        output += "  "+self.filters_str()+"\n\n"
+        tmpsettings.pop('FILTERS')
+
+        output += "Other settings:\n"
+        for name, value in tmpsettings.iteritems():
+            output += "%20s: %-40s\n" % (name, value)
+
+
         return output
     # end def __str__
 
@@ -152,6 +228,8 @@ class Settings:
         
         #import os
         import pickle
+
+        self.saveHistoricalRates() # will only save if rates are up to date
 
         if (filename==None):
             filename = self.OPTIONSFILE
@@ -174,22 +252,32 @@ class Settings:
         if (args[0] == 'print'):
             print self
             return
+        elif (args[0] == 'save'):
+            self.saveFilters()
+            return
         elif (args[0] == 'help'):
-            print "Argument for -o are of the format command=argument, where argument is the new value for the setting."
+            print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
+            print "Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings."
             print "  database=filename       Change the database file used."
-            print "  netbase=url             Remove database we can download to get new records"
-            print "  netpost=url             URL to access to indicate netbase successfully downloaded"
+            #print "  netbase=url             Remote database we can download to get new records"
+            #print "  netpost=url             URL to access to indicate netbase successfully downloaded"
             print "  maxprint=integer        The maximum number of records to print"
-            print "  allowance=value         Setting the weekly allowance value"
+            print "  allowance=value         Setting the weekly allowance value (set to 0 to disable)"
             print "  totalvalues=boolean     Whether to display the total value of a record or the delta of each account."
             print "  not=x                   Set the character used to negate strings and types to x."
-            print "  addplace=name           Add a suggested place name"
-            print "  delplace=name           Remove a suggested place name"
-            print "  addtype=name            Add a new type of record"
-            print "  deltype=name            Remove a type of record"
-            print "  addaccount=name         Add a new account"
-            print "  delaccount=name         Delete an account"
-            print "  print                   Special command to print the current options in an ugly way"
+            print "  addplace=name           Add a suggested place name."
+            print "  delplace=name           Remove a suggested place name."
+            print "  addtype=name            Add a new type of record."
+            print "  deltype=name            Remove a type of record."
+            print "  addaccount=name         Add a new account or restore one that has been hidden with 'delaccount'."
+            print "  delaccount=name         Hide an account in a more persistent way than -C provides."
+            print "  addforeign=name:CUR     Add an account with the currency CUR instead of %s." % self.options['defaultCurrency']
+            print "  currency=CUR            Change the presumed currency of non-foreign accounts to CUR instead of %s." % self.options['defaultCurrency']
+            print "  getexchange=CUR         Update the exchange rate for CUR using Google."
+            print "  setexchange=CUR:value   Manually set the exchange rate for CUR to value."
+            print "  save                    Save current filters as the defaults and commit any other changes to settings."
+            print "  print                   Special command to print the current options in an ugly way."
+            print "  help                    Print this help."
             return
         elif (len(args) != 2):
             print "Options must be changed using command=argument format. Use -o help for recognized options."
@@ -238,7 +326,10 @@ class Settings:
         #   totalvalues=boolean
         elif (command == 'totalvalues'):
             oldTotalValues = self.totalvalues()
-            self.setTotalvalues(arg)
+            if arg == "True" or arg == "true":
+                self.setTotalvalues(True)
+            else:
+                self.setTotalvalues(False)
             print "Changed totalvalues from '%s' to '%s'" % (oldTotalValues, self.totalvalues())
             changedOptions = True
 
@@ -305,13 +396,35 @@ class Settings:
             else:
                 print "Could not delete account %s" % arg
 
+        elif (command == 'addforeign'):
+            if self.addForeign(arg):
+                print "Added foreign account %s" % arg
+                changedOptions = True
+            else:
+                print "Could not add account %s" % arg
+
+        elif (command == 'getexchange'):
+            if self.setExchange(arg, self.getExchangeRate(arg)):
+                changedOptions = True
+            else:
+                print "Could not set exchange rate"
+                
+        elif (command == 'setexchange'):
+            try:
+                args = arg.split(":")
+                currency=args[0]
+                rate=float(args[1])
+            except:
+                print "Could not parse argument %s" % arg
+            if self.setExchange(currency, rate):
+                changedOptions = True
+            else:
+                print "Could not set exchange rate of %s" % currency
+            
         elif (command == 'renameaccount'):
             # self.renameAccount(oldname, newname) <- how to read in two arguments? command line? keyboard input?
             print "Cannot rename accounts yet"
             
-
-        #!   filters???
-
         else:
             print "Unrecognized command. Use -o help for recognized commands."
 
@@ -329,7 +442,28 @@ class Settings:
             else:
                 i = i+1
         return key
-        
+
+    def filters_str(self):
+        """ Return the command line args necessary for creating the current filter set """
+        # Note that if the command line options change, this must change
+        output = ""
+        if self.options['FILTERS']['dates'] is not None:
+            output += "-D '"+self.options['FILTERS']['dates']+"' "
+        if self.options['FILTERS']['accounts'] is not None:
+            output += "-A '"+self.options['FILTERS']['accounts']+"' "
+        if self.options['FILTERS']['columns'] is not None:
+            output += "-C '"+self.options['FILTERS']['columns']+"' "
+        if self.options['FILTERS']['types'] is not None:
+            output += "-T '"+self.options['FILTERS']['types']+"' "
+        if self.options['FILTERS']['recipients'] is not None:
+            output += "-L '"+self.options['FILTERS']['recipients']+"' "
+        if self.options['FILTERS']['string'] is not None:
+            output += "-S '"+self.options['FILTERS']['string']+"' "
+        if self.options['FILTERS']['values'] is not None:
+            output += "-V '"+self.options['FILTERS']['values']+"' "
+        if self.options['FILTERS']['uid'] is not None:
+            output += "-X '"+self.options['FILTERS']['uid']+"' "
+        return output
 
     # --------------------------------------------------------------------------------
     # Defs to get values of current options
@@ -373,6 +507,10 @@ class Settings:
             if acc not in self.options['deletedAccounts']:
                 visible.append(name)
         return visible
+
+    def foreignAccountKeys(self):
+        """ Return the foreign account keys """
+        return self.options['foreignCurrencies'].keys()
 
     def accountKey(self, name):
         """ Return an account key given its name """
@@ -430,7 +568,6 @@ class Settings:
             filter = filter[1:]
         return filter
 
-
     def places(self, ind=None):
         """ Return the list of places """
         if (ind==None):
@@ -477,6 +614,61 @@ class Settings:
     def notchar(self):
         """ Return the not character """
         return self.options['NOTCHAR']
+
+    def isForeign(self,acc):
+        """ Return where an account is foreign """
+        if acc in self.options['foreignCurrencies'].keys():
+            return True
+        else:
+            return False
+
+    def exchange(self,acc):
+        """ Return the exchange rate of an account """
+        if self.isForeign(acc):
+            currency = self.options['foreignCurrencies'][acc]
+            return self.options['exchangeRates'][currency]
+        else:
+            return 1.00
+
+    def getExchangeRate(self, currency, data=False):
+        """ Return the conversion to multiply the foreign currency by to get the default currency """
+        currencyFrom = currency
+        currencyTo = self.options['defaultCurrency']
+        # if being called multiple times, should provide data so as to not call the API every time
+        if data is False:
+            data = self.getOpenExchangeRates()
+        defaultRate = data['rates'][currencyTo]
+        destinationRate = data['rates'][currencyFrom]
+	return float(defaultRate/destinationRate)
+
+    def getOpenExchangeRates(self):
+        """ Use open exchange rate API to get exchange rates """
+        import urllib2
+        import json
+        apiURL='https://openexchangerates.org/api/latest.json?app_id=07da2e05cce04ac48280eb00ce9e3eca'
+        response=urllib2.urlopen(apiURL)
+        data=json.load(response)
+        return data
+
+    def updateExchanges(self):
+        """ Update all the exchange rates using Google """
+	rates = self.getOpenExchangeRates()
+        for currency in self.options['exchangeRates'].iterkeys():
+            rate = self.getExchangeRate(currency, data=rates)
+            if rate is not False:
+                self.setExchange(currency, rate)
+        self.UPDATEDRATES = True
+                #print "Set 1 %s = %f %s" % (currency, rate, self.options['defaultCurrency'])  
+            #else:
+                #print "Could not get exchange rate for %s" % currency
+
+    def saveHistoricalRates(self):
+        """ Add the current exchange rates to the historical record """
+        if self.UPDATEDRATES is True:
+            self.options['historicalRates'][self.TODAY] = self.options['exchangeRates']
+        else:
+            print "Exchange rates have not been updated. Since they are out of date, they will not be saved as today's rates."
+
 
     # --------------------------------------------------------------------------------
     # Defs to change values of current options
@@ -565,9 +757,55 @@ class Settings:
                 self.undelAccount(name)
                 return True
             else:
-                print "That account already exists"
+                print "That account name already exists"
                 return False
 
+    def addForeign(self, args):
+        """ Add an account in a foreign currency """
+        args = args.split(":")
+        try:
+            if (len(args[1])!=3 or not args[1].isalpha()):
+                print "%s is not a 3-character currency code" % args[1]
+                return False
+        except:
+            print "Could not get currency code from %s" % args
+            return False
+        name=args[0]
+        currency=args[1].upper()
+
+        if self.addAccount(name) is False:
+            # Adding account must have failed
+            return False
+
+        # Get the key of the account we just made
+        acc = self.accountKey(name)
+
+        # Set the account currency
+        self.options['foreignCurrencies'][acc] = currency
+
+        # Try to get the exchange rate
+        rate=self.getExchangeRate(currency)
+        if rate is False:
+            print "Could not get exchange rate. Please set the exchange rate manually."
+            rate=0.0
+            
+        print "Exchange rate set to %f" % rate
+
+        # Now save the exchange rate for this currency
+        self.options['exchangeRates'][currency] = rate
+
+        return True
+
+        
+    def setExchange(self, currency, rate):
+        if currency in self.options['exchangeRates'].keys():
+            self.options['exchangeRates'][currency] = rate
+            print "Set exchange rate of %s to %f" % (currency, rate)
+            return True
+        else:
+            print "There are no accounts with currency %s" % currency
+            return False
+        
     def undelAccount(self, name):
         """ Undelete an account """
         key = self.accountKey(name)
@@ -597,3 +835,9 @@ class Settings:
             return True
         else:
             return False
+
+
+    def saveFilters(self):
+        print "Setting default filters: %s" % self.filters_str()
+        self.save()
+

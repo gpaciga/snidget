@@ -104,16 +104,16 @@ class Database:
         #divider = "----------   ----------   ------------------------   ------------------------------------   "
 
         # Make a format string with the right size arguments to the %s values
-        lineformat = "%%-%ds   %%-%ds   %%-%ds   %%-%ds   " % (wDate, wType, wDest, wDesc)
+        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % ("DATE", "TYPE", "LOCATION", "DESCRIPTION")
-        divider = "%s   %s   %s   %s   " % ("-"*wDate, "-"*wType, "-"*wDest, "-"*wDesc)
+        divider = "%s  %s  %s  %s  " % ("-"*wDate, "-"*wType, "-"*wDest, "-"*wDesc)
 
         if (totalValue):
             output += "  VALUE   "
             divider += "-------   "
         else:
             for account in self.settings.accounts().itervalues():
-                if account not in self.settings.deletedAccountNames():
+                if account not in self.settings.deletedAccountNames() and self.is_printable(account):
                     if len(account)>7:
                         account = account[0:7]
                     output += "%7s   " % account # Account names
@@ -136,35 +136,44 @@ class Database:
         output += divider
 
         # The number of spaces required to line up the Total labels correctly
-        balanceSpacing = wDate + 3 + wType + 3 + wDest + 3 + wDesc + 3 - 19
+        colspace=2
+        balanceSpacing = wDate + wType + wDest + wDesc + (colspace*4) - 19
 
         # Print a line of account totals of visible records
         output += "%s Total visible:  " % (" "*balanceSpacing)
         if (totalValue):
-            output += "%9.2f " % sum(balances['visible'].values())
+            #output += "%9.2f " % sum(balances['visible'].values())
+            output += "%9.2f " % balances['visible']['sum']
         else:
-            for v in balances['visible'].itervalues():
-                output += "%9.2f " % v
+            for k, v in balances['visible'].iteritems():
+                if k is not 'sum' and self.is_printable(k):
+                    output += "%9.2f " % v
         output += "\n"
 
         # Print a line of account totals over all records
         output += "%s Total balance:  " % (" "*balanceSpacing)
         if (totalValue):
-            output += "%9.2f " % sum(balances['all'].values())
+            #output += "%9.2f " % sum(balances['all'].values())
+            output += "%9.2f " % balances['all']['sum']
         else:
-            for a in balances['all'].itervalues():
-                output += "%9.2f " % a
+            for k, a in balances['all'].iteritems():
+                if k is not 'sum' and self.is_printable(k):
+                    output += "%9.2f " % a
         output += "\n"
 
-        vistotal = sum(balances['visible'].values())
-        total = sum(balances['all'].values())
-        weekly = sum(balances['thisweek'].values())
+        #vistotal = sum(balances['visible'].values())
+        #total = sum(balances['all'].values())
+        #weekly = sum(balances['thisweek'].values())
+        vistotal = balances['visible']['sum']
+        total = balances['all']['sum']
+        weekly = balances['thisweek']['sum']
 
         remaining = self.settings.allowance()+weekly
         output += "    Visible:    %9.2f   (%d records)\n" % (vistotal, len(printable))
         output += "    Balance:    %9.2f\n" % total
-        output += "    This Week:  %9.2f\n" % weekly
-        output += "    Remaining:  %9.2f\n" % remaining
+        if (self.settings.allowance() > 0.0):
+            output += "    This Week:  %9.2f\n" % weekly
+            output += "    Remaining:  %9.2f\n" % remaining
         return output
 
     #--------------------------------------------------------------------------
@@ -238,35 +247,31 @@ class Database:
         outfile.close()
     
 
-    def downloadRecords(self):
-        """ Download new records from online and add them to the database """
-        import urllib
-        import transaction
-
-        #! Should check if the file we downloaded is the right format
-        #! Should check if transactions already exist or if UIDs conflict
-
-        # If we have no file defined to download, don't download anything
-        if self.settings.netbase() == "":
-            print "Internet database file (NETBASE) not defined"
-            return
-
-        url = self.settings.netbase()
-        # get the specified url as a tuple (filename, headers)
-        page = urllib.urlretrieve(url)
-        #headers = page[1] #this is unused
-        content = file(page[0],'r')
-
-        # translate the contents into records
-        for line in content:
-            newRecord = transaction.Transaction(self, self.settings, line)
-            self.add(newRecord)
-            self.isChanged = True # database not changed if there are no lines
-
-        # Now archive the online records
-        if self.settings.netpost() != "":
-            url = self.settings.netpost()
-            page = urllib.urlretrieve(url)
+    ## Downloading from an online database is no longer supported
+    #def downloadRecords(self):
+    #    """ Download new records from online and add them to the database """
+    #    import urllib
+    #    import transaction
+    #    #! Should check if the file we downloaded is the right format
+    #    #! Should check if transactions already exist or if UIDs conflict
+    #    # If we have no file defined to download, don't download anything
+    #    if self.settings.netbase() == "":
+    #        print "Internet database file (NETBASE) not defined"
+    #        return
+    #    url = self.settings.netbase()
+    #    # get the specified url as a tuple (filename, headers)
+    #    page = urllib.urlretrieve(url)
+    #    #headers = page[1] #this is unused
+    #    content = file(page[0],'r')
+    #    # translate the contents into records
+    #    for line in content:
+    #        newRecord = transaction.Transaction(self, self.settings, line)
+    #        self.add(newRecord)
+    #        self.isChanged = True # database not changed if there are no lines
+    #    # Now archive the online records
+    #    if self.settings.netpost() != "":
+    #        url = self.settings.netpost()
+    #        page = urllib.urlretrieve(url)
 
 
     #--------------------------------------------------------------------------
@@ -297,6 +302,23 @@ class Database:
                             wbalance[acc] += delta
                         vbalance[acc] += delta
 
+        # Now add another field for the sum in the default currency
+        balance['sum'] = 0.0
+        vbalance['sum'] = 0.0
+        wbalance['sum'] = 0.0
+        for acc, value in balance.iteritems():
+            # protect against the fact that 'sum' will be one of the accounts...
+            if ( acc != 'sum' ):
+                if acc in self.settings.foreignAccountKeys():
+                    balance['sum'] += balance[acc]*self.settings.exchange(acc)
+                    vbalance['sum'] += vbalance[acc]*self.settings.exchange(acc)
+                    wbalance['sum'] += wbalance[acc]*self.settings.exchange(acc)
+                else:
+                    balance['sum'] += balance[acc]
+                    vbalance['sum'] += vbalance[acc]
+                    wbalance['sum'] += wbalance[acc]
+
+        # Return the result
         result = { 'all':balance,
                    'visible':vbalance,
                    'thisweek':wbalance }
@@ -520,15 +542,17 @@ class Database:
 
     def resetFilters(self):
         """ Remove all filters applied """
-        self.filters = {
-            'dates':None,      # e.g., 2009-01-01,2009-07-01 or W1, W52, etc
-            'accounts':None,   # e.g., BMO,RBC 
-            'types':None,      # list of types to display
-            'recipients':None, # list of recipients (more strict than 'string')
-            'string':None,     # must include this string in desc or dest
-            'values':None,     # minval,maxval
-            'uid':None,        # exclude these uids
-            }
+        #self.filters = {
+        #    'dates':None,      # e.g., 2009-01-01,2009-07-01 or W1, W52, etc
+        #    'accounts':None,   # e.g., BMO,RBC 
+        #    'types':None,      # list of types to display
+        #    'recipients':None, # list of recipients (more strict than 'string')
+        #    'string':None,     # must include this string in desc or dest
+        #    'values':None,     # minval,maxval
+        #    'uid':None,        # exclude these uids
+        #    }
+        for filt in self.filters.iterkeys():
+            self.filters[filt] = None
 
 
     def setFilterDefaults(self):
@@ -727,6 +751,23 @@ class Database:
             for uid in uids:
                 self.filterUID(uid, False)
 
+    def is_printable(self, name):
+        """ Return a boolean saying whether the account is allowed by the columns filter """
+        if self.filters['columns'] is not None and self.filters['columns'] not in ["None", "none", "All", "all"]:
+            allowed = self.filters['columns'].split(',')
+            if name in self.settings.accountNames():
+                if name in allowed: return True
+                else: return False
+            elif name in self.settings.accountKeys():
+                # First convert the names allowed to their keys
+                allowed_keys = []
+                for account in allowed: allowed_keys.append(self.settings.accountKey(account))
+                if name in allowed_keys: return True
+                else: return False
+            else:
+                print "Error: account %s not recognized in is_printable" % name
+        elif self.filters['columns'] in ["None", "none"]: return False
+        else: return True # no columns = all columns
 
     # EXTRA STUFF FOR POSSIBLE GUI
     def headings(self):
