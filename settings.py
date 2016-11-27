@@ -282,20 +282,6 @@ class Settings:
             print "Changed database from '%s' to '%s'" % (oldDatabase, self.database())
             changedOptions = True
 
-        #   netbase='txt'
-        elif (command == 'netbase'):
-            oldNetbase = self.netbase()
-            self.setNetbase(arg)
-            print "Changed netbase from '%s' to '%s'" % (oldNetbase, self.netbase())
-            changedOptions = True
-
-        #   netpost='script'
-        elif (command == 'netpost'):
-            oldNetpost = self.netpost()
-            self.setNetpost(arg)
-            print "Changed netpost from '%s' to '%s'" % (oldNetpost, self.netpost())
-            changedOptions = True
-
         #   maxprint=integer
         elif (command == 'maxprint'):
             oldMaxprint = self.maxprint()
@@ -578,14 +564,6 @@ class Settings:
         """ Return the weekly allowance """
         return self.options['ALLOWANCE']
 
-    def netbase(self):
-        """ Return the network database address """
-        return self.options['NETBASE']
-
-    def netpost(self):
-        """ Return the network postscript """
-        return self.options['NETPOST']
-
     def npredict(self):
         """ Return the default number of predictions """
         return self.options['NPREDICT']
@@ -663,16 +641,6 @@ class Settings:
     def setDatabase(self, filename):
         """ Set the database file name """
         self.options['DATABASE'] = filename
-        return True
-
-    def setNetbase(self, url):
-        """ Set the netbase url """
-        self.options['NETBASE'] = url
-        return True
-
-    def setNetpost(self, url):
-        """ Set the netpost url """
-        self.options['NETPOST'] = url
         return True
 
     def setMaxprint(self, maxval):
