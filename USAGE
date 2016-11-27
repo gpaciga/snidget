@@ -1,0 +1,36 @@
+snidget V4.0(beta)
+Usage: snidget.py [args]
+
+Call with no arguments to get the graphical user interface.
+
+COMMANDS are run from left to right, until either all complete or a fatal error is encountered.
+  -a          Prints the expense record, showing all records.
+  -b	      Prints account balances as a function of time
+  -e uid      Edit the record specified by uid. Accepts a comma separated list.
+  -h          Print this help.
+  -i          Print an id string.
+  -l	      Print a LaTeX formatted summary of expenses.
+  -n          Add new expense to the file. Filters have no effect.
+  -o cmd=arg  Change a setting. Run with -o help for a list of options.
+  -p          Print the most recent expenses in the record.
+  -r          Print a list of recipients with balances.
+  -s          Sort the database by date and save.
+  -t          Print a list of types with balances.
+  -u          Downloads the online snidget entries and saves them.
+  -v          Same as -p, but prints only the total value of the record (or vise versa if this is default)
+  -w          Prints the total values of the last seven days for every day in range.
+  -x uid      Delete record specified by uid. 
+
+FILTERS change what is printed, effective until the program terminates. Order might matter.
+  -A acc      Print only transactions with specified account.
+  -D d1[,d2]  Limit records to a date range, from d1 to present or from d1 up to (not including) d2.
+  -E          Include expenses only, not bills, income, transfers, or adjustments.
+  -F type     Hide records of a particular type (F is for False) but print all else.
+  -L dest     Print only records with a specific destination/recipient/location.
+  -R          Reset all filters to zero, including defaults
+  -S string   Print only records which include the string in either description or destination.
+              (or, records which DONT include the string if prefixed by the NOT character, ! by default)
+  -T type     Show records of only specified types. Accepts a comma separated list.
+  -W          Prints records from the last seven days including today.
+  -V min,max  Prints transactions with value in the range. Either max or min may be empty.
+  -X uid      Excludes record the specified uid. Accepts a comma separated list.
