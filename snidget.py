@@ -174,12 +174,6 @@ def parseArgs(argv):
             print "  ============================================="
             print "  %35s %9.2f" % (" ", typesum)
 
-# NETBASE is no longer supported
-#        elif opt == "-u":
-#            # Get new records from the internet
-#            database.downloadRecords()
-#            database.save()
-
         elif opt == "-u":
             print "Updating all exchange rates from Google (but you must save explicitly with -o save!)"
             settings.updateExchanges()
@@ -275,16 +269,6 @@ def start_gui():
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
         start_gui()
-#         import gui
-#         #except ImportError:
-#         #     print "Error: SnidgetGUI could not be imported"
-#         #else:
-#             # Specify the rsrc file explicitly so the gui doesn't get confused
-#             #r_file = gui.model.resource.ResourceFile('%s/gui.rsrc.py'%sys.path[0])
-#             #app = gui.model.Application(gui.SnidgetGUI, rsrc=r_file.getResource())
-#             #app.MainLoop()
-#         snidget_gui = gui.SnidgetGUI()
-#         snidget_gui.main()
     else:
         parseArgs(sys.argv[1:])
 

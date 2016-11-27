@@ -44,8 +44,6 @@ class Settings:
     # These will be overwritten if settings.pkl exists
     options = {
         'DATABASE' : "expenses.txt",
-#        'NETBASE' : "",
-#        'NETPOST' : "",
         'MAXPRINT' : 25,           # Maximum number of records to print by default
         'ALLOWANCE' : 100,         # Basis for calculating "Remaining" total
         'TOTALVALUES' : False,     # Whether to print the total value or the value of each account
@@ -113,10 +111,6 @@ class Settings:
         import os
         import pickle
 
-        # Before doing anything, set the correct default filter type
-        #self.options['FILTERS']['types'] = self.extypesString()
-    
-
         if (filename==None):
             self.OPTIONSFILE = "%s/%s" % (sys.path[0], 'settings.pkl')
             filename = self.OPTIONSFILE
@@ -172,20 +166,15 @@ class Settings:
             if doSave: self.save()
                     
         else:
-            #import defaults
-            #self.options = defaults.options
             optionsPickle = open(filename,'wb')
             pickle.dump(self.options, optionsPickle)
             optionsPickle.close()
-            print "Imported and pickled default options. You should not get this message again."
+            print "Pickled default options. You should not get this message again."
     # end def init
 
     def __str__(self):
         """ Convert current options into string for printing """
         output = ""
-        #for name, value in self.options.iteritems():
-        #    output += "%20s = %-40s\n" % (name, value)
-        #return output
         tmpsettings=self.options.copy()
 
         output += "Accounts:\n"
@@ -259,8 +248,6 @@ class Settings:
             print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
             print "Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings."
             print "  database=filename       Change the database file used."
-            #print "  netbase=url             Remote database we can download to get new records"
-            #print "  netpost=url             URL to access to indicate netbase successfully downloaded"
             print "  maxprint=integer        The maximum number of records to print"
             print "  allowance=value         Setting the weekly allowance value (set to 0 to disable)"
             print "  totalvalues=boolean     Whether to display the total value of a record or the delta of each account."
@@ -422,7 +409,7 @@ class Settings:
                 print "Could not set exchange rate of %s" % currency
             
         elif (command == 'renameaccount'):
-            # self.renameAccount(oldname, newname) <- how to read in two arguments? command line? keyboard input?
+            # self.renameAccount(oldname, newname)
             print "Cannot rename accounts yet"
             
         else:
@@ -658,9 +645,6 @@ class Settings:
             if rate is not False:
                 self.setExchange(currency, rate)
         self.UPDATEDRATES = True
-                #print "Set 1 %s = %f %s" % (currency, rate, self.options['defaultCurrency'])  
-            #else:
-                #print "Could not get exchange rate for %s" % currency
 
     def saveHistoricalRates(self):
         """ Add the current exchange rates to the historical record """

@@ -246,34 +246,6 @@ class Database:
         outfile.write(self.encode())
         outfile.close()
     
-
-    ## Downloading from an online database is no longer supported
-    #def downloadRecords(self):
-    #    """ Download new records from online and add them to the database """
-    #    import urllib
-    #    import transaction
-    #    #! Should check if the file we downloaded is the right format
-    #    #! Should check if transactions already exist or if UIDs conflict
-    #    # If we have no file defined to download, don't download anything
-    #    if self.settings.netbase() == "":
-    #        print "Internet database file (NETBASE) not defined"
-    #        return
-    #    url = self.settings.netbase()
-    #    # get the specified url as a tuple (filename, headers)
-    #    page = urllib.urlretrieve(url)
-    #    #headers = page[1] #this is unused
-    #    content = file(page[0],'r')
-    #    # translate the contents into records
-    #    for line in content:
-    #        newRecord = transaction.Transaction(self, self.settings, line)
-    #        self.add(newRecord)
-    #        self.isChanged = True # database not changed if there are no lines
-    #    # Now archive the online records
-    #    if self.settings.netpost() != "":
-    #        url = self.settings.netpost()
-    #        page = urllib.urlretrieve(url)
-
-
     #--------------------------------------------------------------------------
     # Functions for printing information about the database
     #--------------------------------------------------------------------------
@@ -542,15 +514,6 @@ class Database:
 
     def resetFilters(self):
         """ Remove all filters applied """
-        #self.filters = {
-        #    'dates':None,      # e.g., 2009-01-01,2009-07-01 or W1, W52, etc
-        #    'accounts':None,   # e.g., BMO,RBC 
-        #    'types':None,      # list of types to display
-        #    'recipients':None, # list of recipients (more strict than 'string')
-        #    'string':None,     # must include this string in desc or dest
-        #    'values':None,     # minval,maxval
-        #    'uid':None,        # exclude these uids
-        #    }
         for filt in self.filters.iterkeys():
             self.filters[filt] = None
 
