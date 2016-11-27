@@ -8,7 +8,7 @@ in particular your expenses and income. The user adds each transaction
 on their accounts and snidget can provide reports about how much
 you're spending.
 
-This program was written by Gregory Paciga (`gpaciga at gmail.com`)
+This program was written by Gregory Paciga (`snidget@greg.paciga.com`)
 in his free time. Bugs, requests, and suggestions can be sent to him,
 or through GitHub.
 

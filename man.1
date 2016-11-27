@@ -1,0 +1,134 @@
+.\" Process this file with
+.\" groff -man -Tascii foo.1
+.\"
+.TH SNIDGET 1 "2010 - 2016" Linux "User Manuals"
+.SH NAME
+snidget \- keep track of expenses and bank balances
+.SH SYNOPSIS
+.B snidget [-abcghilnprstuvwERW] [-d
+.I num
+.B ] [-e
+.I uid
+.B ] [-o
+.I command
+.B ] [-x
+.I uid
+.B ] [-A
+.I acc
+.B ] [-B
+.I acc
+.B ] [-C
+.I acc
+.B ] [-D
+.I d1,d2
+.B ] [-F
+.I type
+.B ] [-L
+.I string
+.B ] [-S
+.I string
+.B ] [-T
+.I type
+.B ] [-V
+.I min,max
+.B ] [-X
+.I uid
+.B ]
+.SH DESCRIPTION
+.B snidget
+keeps a database of expenses, categorized into user defined
+types, including the ability to track separate real or virtual
+accounts (e.g, a credit card, a bank account, and cash) and
+display current balances. The snidget database is only as
+accurate as the user, and you would be wise to keep a backup
+of the database file since this is not guaranteed to be a
+fool-proof program.
+.SH COMMANDS
+Commands, identified by lower case letters, are command line options
+that change what function you want
+snidget to perform. For basic use, -n and -p are the most important.
+.IP -a
+Prints the expense record, similar to the -p
+but does not limit the number of records printed.
+.IP -b
+Print the account balances as a function of time.
+.IP -c
+Print all current account balances.
+.IP "-d num"
+Print sum of previous num days for every day. -d 7 is the same as -w.
+.IP "-e uid"
+Edit the record specified by uid. Accepts a comma separated list.
+.IP -g
+Starts the GUI. Experimental at best.
+.IP -h
+Print a helpful summary of command line options.
+.IP -i
+Prints a new UID to the terminal.
+.IP -l
+Print a latex formatted report (experimental).
+.IP -n
+Add a new transaction to the file.
+.IP -o cmd=arg
+Change a default setting. Run with
+.B -o help
+for a list of options. 
+.IP -p
+Print the most recent expenses in the database.
+.IP -r
+Print a list of all destinations and their balances.
+.IP -s
+Sort the database by date and save.
+.IP -t
+Print a list of all types and their balances. 
+.IP -u
+Update the exchang erates for all currencies. Run with "-u -o save" to commit to new rates to settings.
+.IP -v
+Same as -p, but prints only the total value of the record instead of individual accounts. This behaviour can be reversed through user options.
+.IP -w
+Print one week total balance for every day in range.
+.IP "-x uid"
+Permanently delete the record specified by this UID. See also -X.
+.SH FILTERS
+Filters, indicated by upper case letters,
+ change what is printed or included in any calculations,
+effective until the program terminates. Order is important. 
+.IP "-A acc"
+Print only transactions associated with the specified account name.
+.IP "-B acc"
+Equivalent to running both -A and -C with the same account(s).
+.IP "-C acc"
+Show only the column for the given account(s).
+.IP "-D d1[,d2]"
+Limit records to a date range, from d1 to present or from d1 up to (but not including) d2. Dates must be in the yyyy-mm-dd format.
+.IP -E
+Include expenses only, not bills, income, transfers, or adjustments.
+.IP "-F type"
+Hide records of a particular type but displays all others. Accepts a comma separated list. See also -T.
+.IP "-L dest"
+Include only records for a specific destination.
+.IP -R
+Reset all filters so no records are hidden, regardless of the default filters.
+.IP "-S string"
+Include only records which include the string in either description or destination. The string can be prefaced with an exclamation
+point (by default, but can be set to other characters with -o not=x) to instead hide records matching the string. 
+.IP "-T type"
+Show records of only specified types. Accepts a comma separated list.
+.IP -W
+Only include records from the last seven days, including today.
+.IP "-V min[,max]"
+Include transactions with total value in the range. Either max or min may be empty, indicating no limit, with
+snidget determining whether you have given a max or min by the location of the comma. If there is no comma, it assumes a minimum.
+.IP "-X uid"
+Excludes record with the specified UID. Accepts a comma separated list. See also -x.
+.SH FILES
+.I expenses.txt
+.RS
+The database, in plain text format.
+.RE
+.I settings.pkl
+.RS
+The settings saved by snidget in python pickle format, which can be changed via the -o option.
+.SH BUGS
+Plenty, I'm sure.
+.SH AUTHOR
+Gregory Paciga <snidget@greg.paciga.com>
