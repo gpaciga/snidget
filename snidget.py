@@ -3,7 +3,7 @@
 
 ##############################################################################
 #
-# Copyright 2010-2016 Gregory Paciga (snidget@greg.paciga.com)
+# Copyright 2010-2017 Gregory Paciga (snidget@greg.paciga.com)
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
 
 # To do: Abstract the expense types from the income types
 #        More error checking and argument type checking
-#        Warn if removing accuont with non-zero balance
+#        Warn if removing account with non-zero balance
 #        When a new Type or Account code is encountered, ask for a name and save it in the options
 #        Maybe have some prediction thing, so if the first few fields are similar it'll suggest a complete record? (e.g. for monthly things)
 
@@ -56,12 +56,12 @@ def usage():
 # end def usage
 
 # Unused option letters:
-#  jkmqyz GHIJKMNOPQUYZ
+#  jklmyz GHIJKMOPQYZ
 
 def parseArgs(argv):
     """ Process command line arguments. """
     try:
-        opts, args = getopt.getopt(argv, "acbd:e:ghilno:prstuvwx:A:B:C:D:EF:L:RS:T:V:WX:", [])
+        opts, args = getopt.getopt(argv, "acbd:e:f:ghino:pqrstuvwx:A:B:C:D:EF:L:N:RS:T:UV:WX:", [])
     except getopt.GetoptError:
         print "Unrecognized option or bad argument. Use -h to get usage information."
         sys.exit(2)
@@ -132,10 +132,16 @@ def parseArgs(argv):
             import transaction
             print transaction.Transaction(database, settings).uid 
 
-        elif opt == "-l":
-            # Print a latex report
-            import latex
-            latex.output(database)
+        elif opt == "-f":
+            if (arg == "latex"):
+                # Print a latex report
+                import latex
+                latex.output(database)
+            elif (arg == "csv"):
+                # Print in CSV
+                print database.__str__(csv=True)
+            else:
+                print "Format '%s' not supported" % (arg)
 
         elif opt == "-n":
             # Create a new entry in the database
@@ -150,6 +156,10 @@ def parseArgs(argv):
         elif opt == "-p":
             # Print the database as it currently stands
             print database
+
+        elif opt == "-q":
+            # Include a running tally of each account
+            print database.__str__(printRunningBalances=True)
 
         elif opt == "-r":
             # Print recipients
@@ -235,12 +245,20 @@ def parseArgs(argv):
             # Print only records with a specific recipient
             database.filters['recipients'] = arg
 
+        elif opt == "-N":
+            # Set the maximum number of records to print at a time in most cases
+            database.filters['maxprint'] = int(arg)
+
         elif opt == "-R":
             database.resetFilters()
 
         elif opt == "-T":
             # Print only type arg
             database.filters['types'] = arg
+
+        elif opt == "-U":
+            # Remove the maximum limit on things to print
+            database.filters['maxprint'] = None
 
         elif opt == "-V":
             # Print records with total value greater than arg

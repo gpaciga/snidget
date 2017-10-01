@@ -44,7 +44,7 @@ class Settings:
     # These will be overwritten if settings.pkl exists
     options = {
         'DATABASE' : "expenses.txt",
-        'MAXPRINT' : 25,           # Maximum number of records to print by default
+        'MAXPRINT' : 25,           # Maximum number of records to print by default (DEPRECATED)
         'ALLOWANCE' : 100,         # Basis for calculating "Remaining" total
         'TOTALVALUES' : False,     # Whether to print the total value or the value of each account
         'NPREDICT' : 6,            # Number of predictions to suggest
@@ -101,6 +101,7 @@ class Settings:
             'string':None,
             'values':None,
             'uid':None,
+            'maxprint':25,
             }
         }
 
@@ -202,7 +203,7 @@ class Settings:
         output += "  "+self.filters_str()+"\n\n"
         tmpsettings.pop('FILTERS')
 
-        output += "Other settings:\n"
+        output += "Other settings: (MAXPRINT is no longer used and will be removed)\n"
         for name, value in tmpsettings.iteritems():
             output += "%20s: %-40s\n" % (name, value)
 
@@ -248,7 +249,7 @@ class Settings:
             print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
             print "Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings."
             print "  database=filename       Change the database file used."
-            print "  maxprint=integer        The maximum number of records to print"
+            print "  maxprint=integer        The maximum number of records to print (deprecated, used only when -N or -U not specified)"
             print "  allowance=value         Setting the weekly allowance value (set to 0 to disable)"
             print "  totalvalues=boolean     Whether to display the total value of a record or the delta of each account."
             print "  not=x                   Set the character used to negate strings and types to x."
@@ -436,6 +437,8 @@ class Settings:
             output += "-V '"+self.options['FILTERS']['values']+"' "
         if self.options['FILTERS']['uid'] is not None:
             output += "-X '"+self.options['FILTERS']['uid']+"' "
+        if self.options['FILTERS']['maxprint'] is not None:
+            output += "-N "+str(self.options['FILTERS']['maxprint'])+" "
         return output
 
     # --------------------------------------------------------------------------------

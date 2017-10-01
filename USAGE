@@ -12,10 +12,11 @@ COMMANDS are run from left to right, until either all complete or a fatal error 
   -g  	      Start the GUI.
   -h          Print this help.
   -i          Print an id string.
-  -l	      Print a LaTeX formatted summary of expenses.
+  -f format   Print a specialized report formats, "latex" or "csv"
   -n          Add new expense to the file. Filters have no effect.
   -o cmd=arg  Change a setting. Run with -o help for a list of options.
   -p          Print the most recent expenses in the record.
+  -q          Include a column for the running total balance. Works best with -B.
   -r          Print a list of recipients with balances.
   -s          Sort the database by date and save.
   -t          Print a list of types with balances.
@@ -24,18 +25,20 @@ COMMANDS are run from left to right, until either all complete or a fatal error 
   -w          Prints the total values of the last seven days for every day in range. Same as '-d 7'.
   -x uid      Delete record specified by uid. 
 
-FILTERS change what is printed, effective until the program terminates. Order might matter.
-  -A acc      Print only transactions with specified account.
-  -B acc      Same as -A acc -C acc at the same time.
-  -C acc      Include only columns from the given accounts (accepts comma separated list; can be None or All)
+FILTERS change what transactions are printed, effective until the program terminates. Order might matter.
+  -A account  Print only transactions involving the specified account.
+  -B account  Same as -A acc -C acc at the same time.
+  -C account  Include only columns from the given accounts (accepts comma separated list; can be None or All)
   -D d1[,d2]  Limit records to a date range, from d1 to present or from d1 up to (not including) d2.
   -E          Include expenses only, not bills, income, transfers, or adjustments.
   -F type     Hide records of a particular type (F is for False) but print all else.
   -L dest     Print only records with a specific destination/recipient/location.
+  -N number   Set the maximum number of transactions to print.
   -R          Reset all filters to zero, including defaults
   -S string   Print only records which include the string in either description or destination.
               (or, records which DONT include the string if prefixed by the NOT character, ! by default)
   -T type     Show records of only specified types. Accepts a comma separated list.
+  -U          Print an unlimited number of transactions.
   -W          Prints records from the last seven days including today.
   -V min,max  Prints transactions with value in the range. Either max or min may be empty.
   -X uid      Excludes record the specified uid. Accepts a comma separated list.

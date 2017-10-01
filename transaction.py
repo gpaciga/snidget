@@ -28,6 +28,7 @@ class Transaction:
             self.dest = ""
             self.desc = ""
             self.deltas = {}
+            self.resultingBalance = {}
             self.id = ""
             self.uid = self.newUID()
             self.visible = True
@@ -77,6 +78,7 @@ class Transaction:
             while len(self.uid)<6:
                 self.uid = "0%s" % self.uid
 
+            self.resultingBalance = {}
             self.visible = True
 
     def strValue(self, printID=True, wDate=10, wType=9, wDest=24, wDesc=34): 
@@ -90,27 +92,48 @@ class Transaction:
         return output
 
 
-    def __str__(self, totalValue=None, printID=True, wDate=10, wType=9, wDest=24, wDesc=34): 
+    def __str__(self, totalValue=None, printID=True, wDate=10, wType=9, wDest=24, wDesc=34, printBalances=False, csv=False): 
         """ Write transaction as a string to be printed """
         # Define the format string using the received inputs for column widths
 
         if (totalValue is None):
             totalValue = self.settings.totalvalues()
 
-        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (wDate, wType, wDest, wDesc)
+        if csv:
+            lineformat = '%s,%s,"%s","%s"' # quotes around destination and description, which can have commas themselves
+        else:
+            lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
         if (totalValue):
-            output += "%9.2f " % self.value()
+            if csv:
+                output += ",%f" % self.value()
+            else:
+                output += "%9.2f " % self.value()
         else:
             for acc in self.settings.accounts():
                 if acc not in self.settings.deletedAccountKeys() and self.database.is_printable(acc):
                     if acc in self.deltas.keys():
-                        output += "%9.2f " % self.deltas[acc]
+                        this_value = self.deltas[acc]
                     else:
-                        output += "%9.2f " % float("0.0")
+                        this_value = float("0.0")
+                    if csv:
+                        output += ",%f" % this_value
+                    else:
+                        output += "%9.2f " % this_value
+                    if printBalances:
+                        if csv: output += ","
+                        if acc in self.resultingBalance.keys():
+                            output += "%9.2f" % self.resultingBalance[acc]
+                        else:
+                            output += "        "
+                        if not csv: output += " "
         if (printID):
+            if csv: output += ","
             output += "%8s" % self.id
-        output += "  %6s" % self.uid
+        if csv:
+            output += ",%s" % self.uid
+        else:
+            output += "  %6s" % self.uid
         return output
 
     def __cmp__(self, other):
@@ -158,6 +181,11 @@ class Transaction:
             else:
                 total += value
         return total
+
+    def setRunningBalance(self, account, balance):
+        """ Set the resulting balance of the account after this transaction """
+        self.resultingBalance[account] = balance
+        return 
 
     def newUID(self):
         """ Generate a UID based on the current timestamp """

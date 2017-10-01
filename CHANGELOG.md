@@ -4,6 +4,12 @@
 * make default params user editable through GUI
 * better plotter would be nice
 * manual editing of historical exchange rates would be useful if they are ever used
+* add account setting to only count a fraction of the value
+
+## v4.2
+* 2017-09-15 - Add option to print running balances for every account (`-q` instead of `-p`).
+* 2017-09-27 - Add print format option, with support for csv and latex. Removed `-l` option for latex-only.
+* 2017-09-30 - Maximum records to print now set with a filter instead of a setting option. -R now clears this limit entirely.
 
 ## v4.1(beta)
 * 2010-12-02 - Added -d option. -d 1 is good for total value in each day.

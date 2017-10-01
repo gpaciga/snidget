@@ -52,16 +52,17 @@ class Database:
         self.isChanged = False
         self.filters = settings.filters()
 
-
-    def __str__(self, nprint=None, totalValue=None):
+    def __str__(self, totalValue=None, printRunningBalances=False, csv=False):
         """ Print the database as a table to the screen """
 
-        if nprint is None:
+        if "maxprint" in self.filters:
+            maxprint = self.filters['maxprint']
+        else:
             try:
-                nprint = self.settings.maxprint()
+                maxprint = self.settings.maxprint()
             except:
-                print "Unable to find user settings"
-                nprint = 25
+                print "Unable to find user settings, setting maxprint to 25"
+                maxprint = 25
 
         if totalValue is None:
             try:
@@ -69,16 +70,20 @@ class Database:
             except:
                 print "Unable to find user settings"
                 totalValue = False
-                    
+
         self.applyFilters()
         balances = self.balances()
 
         # Make a list of visible records
         # so we can make use of MAXPRINT in array indices
-        printable = []
+        all_printable = []
         for record in self.records:
             if record.visible:
-                printable.append(record)
+                all_printable.append(record)
+	if maxprint is not None:
+            printable = all_printable[-maxprint:]
+        else:
+            printable = all_printable
 
         # Determine appropriate column widths
         printID = False # Don't print the ID column unless there is data there
@@ -86,7 +91,7 @@ class Database:
         wDest = 8
         wDesc = 11
         wDate = 10
-        for record in printable[-nprint:]:
+        for record in printable:
             if len(record.type) > wType:
                 wType = len(record.type)
             if len(record.dest) > wDest:
@@ -104,76 +109,100 @@ class Database:
         #divider = "----------   ----------   ------------------------   ------------------------------------   "
 
         # Make a format string with the right size arguments to the %s values
-        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
+        if (csv):
+            lineformat = "%s,%s,%s,%s"
+        else:
+            lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % ("DATE", "TYPE", "LOCATION", "DESCRIPTION")
         divider = "%s  %s  %s  %s  " % ("-"*wDate, "-"*wType, "-"*wDest, "-"*wDesc)
 
         if (totalValue):
-            output += "  VALUE   "
+            if (csv):
+                output += ",VALUE"
+            else:
+                output += "  VALUE   "
             divider += "-------   "
         else:
             for account in self.settings.accounts().itervalues():
                 if account not in self.settings.deletedAccountNames() and self.is_printable(account):
-                    if len(account)>7:
-                        account = account[0:7]
-                    output += "%7s   " % account # Account names
+                    if (csv):
+                        output += ",%s" % (account)
+                    else:
+                        if len(account)>7:
+                            account = account[0:7]
+                        output += "%7s   " % account # Account names
                     divider += "-------   "
+                    if printRunningBalances:
+                        if (csv):
+                            output += ",Balance"
+                        else:
+                            output += "Balance  "
+                        divider += "-------  "
         if (printID):
-            output  += "    ID  "
+            if (csv):
+                output += ",ID"
+            else:
+                output  += "    ID  "
             divider += "------  "
-        output += "   UID\n"
+        if (csv):
+            output += ",UID\n"
+        else:
+            output += "   UID\n"
         divider += "------\n"
-        output += divider
+        if not csv: output += divider
 
         # Add the records to the database
         it = 1
-        for record in printable[-nprint:]:
-            output += record.__str__(totalValue=totalValue, printID=printID, wType=wType, wDest=wDest, wDesc=wDesc)
+        for record in printable:
+            output += record.__str__(totalValue=totalValue, printID=printID, wType=wType, wDest=wDest, wDesc=wDesc, printBalances=printRunningBalances, csv=csv)
             output += "\n"
-            if it % 5 == 0:
+            if not csv and it % 5 == 0:
                 output += "\n"
             it += 1
-        output += divider
+        if not csv: output += divider
 
-        # The number of spaces required to line up the Total labels correctly
-        colspace=2
-        balanceSpacing = wDate + wType + wDest + wDesc + (colspace*4) - 19
+        # print summary information only when not csv
+        if not csv:
+            # The number of spaces required to line up the Total labels correctly
+            colspace=2
+            balanceSpacing = wDate + wType + wDest + wDesc + (colspace*4) - 19
 
-        # Print a line of account totals of visible records
-        output += "%s Total visible:  " % (" "*balanceSpacing)
-        if (totalValue):
-            #output += "%9.2f " % sum(balances['visible'].values())
-            output += "%9.2f " % balances['visible']['sum']
-        else:
-            for k, v in balances['visible'].iteritems():
-                if k is not 'sum' and self.is_printable(k):
-                    output += "%9.2f " % v
-        output += "\n"
+            # Print a line of account totals of visible records
+            output += "%s Total visible:  " % (" "*balanceSpacing)
+            if (totalValue):
+                #output += "%9.2f " % sum(balances['visible'].values())
+                output += "%9.2f " % balances['visible']['sum']
+            else:
+                for k, v in balances['visible'].iteritems():
+                    if k is not 'sum' and self.is_printable(k):
+                        output += "%9.2f " % v
+            output += "\n"
 
-        # Print a line of account totals over all records
-        output += "%s Total balance:  " % (" "*balanceSpacing)
-        if (totalValue):
-            #output += "%9.2f " % sum(balances['all'].values())
-            output += "%9.2f " % balances['all']['sum']
-        else:
-            for k, a in balances['all'].iteritems():
-                if k is not 'sum' and self.is_printable(k):
-                    output += "%9.2f " % a
-        output += "\n"
+            # Print a line of account totals over all records
+            output += "%s Total balance:  " % (" "*balanceSpacing)
+            if (totalValue):
+                #output += "%9.2f " % sum(balances['all'].values())
+                output += "%9.2f " % balances['all']['sum']
+            else:
+                for k, a in balances['all'].iteritems():
+                    if k is not 'sum' and self.is_printable(k):
+                        output += "%9.2f " % a
+            output += "\n"
 
-        #vistotal = sum(balances['visible'].values())
-        #total = sum(balances['all'].values())
-        #weekly = sum(balances['thisweek'].values())
-        vistotal = balances['visible']['sum']
-        total = balances['all']['sum']
-        weekly = balances['thisweek']['sum']
+            #vistotal = sum(balances['visible'].values())
+            #total = sum(balances['all'].values())
+            #weekly = sum(balances['thisweek'].values())
+            vistotal = balances['visible']['sum']
+            total = balances['all']['sum']
+            weekly = balances['thisweek']['sum']
 
-        remaining = self.settings.allowance()+weekly
-        output += "    Visible:    %9.2f   (%d records)\n" % (vistotal, len(printable))
-        output += "    Balance:    %9.2f\n" % total
-        if (self.settings.allowance() > 0.0):
-            output += "    This Week:  %9.2f\n" % weekly
-            output += "    Remaining:  %9.2f\n" % remaining
+            remaining = self.settings.allowance()+weekly
+            output += "    Visible:    %9.2f   (%d records)\n" % (vistotal, len(printable))
+            output += "    Balance:    %9.2f\n" % total
+            if (self.settings.allowance() > 0.0):
+                output += "    This Week:  %9.2f\n" % weekly
+                output += "    Remaining:  %9.2f\n" % remaining
+
         return output
 
     #--------------------------------------------------------------------------
@@ -255,8 +284,8 @@ class Database:
         self.applyFilters()
 
         balance = {}
-        wbalance = {}
-        vbalance = {}
+        wbalance = {} # Running balance over last week
+        vbalance = {} # Balance of visible records
         for acc in self.settings.accounts().iterkeys():
             if acc not in self.settings.deletedAccountKeys():
                 balance[acc] = 0.0
@@ -267,6 +296,7 @@ class Database:
             for acc, delta in record.deltas.iteritems():
                 if acc not in self.settings.deletedAccountKeys():
                     balance[acc] += delta
+                    record.setRunningBalance(acc, balance[acc])
             if record.visible == True:
                 for acc, delta in record.deltas.iteritems():
                     if acc not in self.settings.deletedAccountKeys():
