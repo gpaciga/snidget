@@ -4,7 +4,8 @@
 * make default params user editable through GUI
 * better plotter would be nice
 * manual editing of historical exchange rates would be useful if they are ever used
-* add account setting to only count a fraction of the value
+* add account setting to only count a fraction of the value (e.g. 50 percent for shared accounts or 0 to exclude entirely from total)
+* refactor the csv stuff, should support multiple print options so csv and -q can be used simultaneously 
 
 ## v4.2
 * 2017-09-15 - Add option to print running balances for every account (`-q` instead of `-p`).
