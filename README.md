@@ -1,6 +1,9 @@
 # snidget
 Personal accounting tool
 
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/gpaciga/snidget.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/gpaciga/snidget/alerts/)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/gpaciga/snidget.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/gpaciga/snidget/context:python)
+
 ## ABOUT SNIDGET
 
 Snidget is a python program which tracks your financial information,
