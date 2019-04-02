@@ -445,7 +445,7 @@ class SnidgetGUI:
         date_max = snidget.database.settings.TODAY + timedelta(1)
 
         # Parse the filter to set the initial dates
-        if snidget.database.filters['dates'] == None:
+        if snidget.database.filters['dates'] is None:
             date_start = date_min
             date_end = date_max
         elif str.find(snidget.database.filters['dates'],'W') >= 0:
@@ -587,7 +587,7 @@ class SnidgetGUI:
         entry = gtk.Entry()
 
         # Set the default if a string filter exists 
-        if snidget.database.filters['string'] == None:
+        if snidget.database.filters['string'] is None:
             default = ''
         else:
             default = snidget.database.filters['string']

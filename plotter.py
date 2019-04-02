@@ -19,7 +19,7 @@
 import snidget
 
 #import numpy as np
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 import gtk
 from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas

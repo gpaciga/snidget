@@ -7,6 +7,9 @@
 * add account setting to only count a fraction of the value (e.g. 50 percent for shared accounts or 0 to exclude entirely from total)
 * refactor the csv stuff, should support multiple print options so csv and -q can be used simultaneously 
 
+## v4.2.1
+* 2019-04-01 - bug fixes highlighted by lgtm.com
+
 ## v4.2
 * 2017-09-15 - Add option to print running balances for every account (`-q` instead of `-p`).
 * 2017-09-27 - Add print format option, with support for csv and latex. Removed `-l` option for latex-only.

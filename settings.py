@@ -112,7 +112,7 @@ class Settings:
         import os
         import pickle
 
-        if (filename==None):
+        if filename is None:
             self.OPTIONSFILE = "%s/%s" % (sys.path[0], 'settings.pkl')
             filename = self.OPTIONSFILE
 
@@ -153,7 +153,7 @@ class Settings:
             for filt,val in self.options['FILTERS'].iteritems():
                 if filt not in defaults['FILTERS']:
                     delete.append(filt)
-            for opt in delete:
+            for filt in delete:
                 print "Removing defunct filter "+filt
                 self.options['FILTERS'].pop(filt)
                 doSave = True
@@ -221,7 +221,7 @@ class Settings:
 
         self.saveHistoricalRates() # will only save if rates are up to date
 
-        if (filename==None):
+        if filename is None:
             filename = self.OPTIONSFILE
 
         optionsPickle = open(filename,'wb')
@@ -516,7 +516,7 @@ class Settings:
 
     def types(self, ind=None):
         """ Return the types dictionary """
-        if (ind==None):
+        if ind is None:
             return self.options['types']
         else:
             return self.options['types'][ind]
@@ -546,7 +546,7 @@ class Settings:
 
     def places(self, ind=None):
         """ Return the list of places """
-        if (ind==None):
+        if ind is None:
             return self.options['places']
         else:
             return self.options['places'][ind]

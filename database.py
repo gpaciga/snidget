@@ -174,7 +174,7 @@ class Database:
                 output += "%9.2f " % balances['visible']['sum']
             else:
                 for k, v in balances['visible'].iteritems():
-                    if k is not 'sum' and self.is_printable(k):
+                    if k != 'sum' and self.is_printable(k):
                         output += "%9.2f " % v
             output += "\n"
 
@@ -185,7 +185,7 @@ class Database:
                 output += "%9.2f " % balances['all']['sum']
             else:
                 for k, a in balances['all'].iteritems():
-                    if k is not 'sum' and self.is_printable(k):
+                    if k != 'sum' and self.is_printable(k):
                         output += "%9.2f " % a
             output += "\n"
 

@@ -39,7 +39,7 @@ import getopt # to parse command line options
 import settings
 import database
 
-__version__ = "4.1-beta"
+__version__ = "4.2.1"
 
 # Load the user settings and database
 settings = settings.Settings()
