@@ -37,15 +37,15 @@ class Transaction:
             from datetime import date
 
             #Split the string, with trailing whitespace (including \n) removed
-            recordList = str.split(recordString.rstrip(),"|")
-            
-            dateList = str.split(recordList[0],"-")
-            self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date        
-            
+            recordList = str.split(recordString.rstrip(), "|")
+
+            dateList = str.split(recordList[0], "-")
+            self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date
+
             self.type = recordList[1] # Type
             self.dest = recordList[2] # Destination/Location
             self.desc = recordList[3] # Description
-            
+
             # If these strings are empty, should make 0
             #self.deltas=[]
             #self.newdeltas={}
@@ -53,7 +53,7 @@ class Transaction:
             #    self.deltas.append(float(recordList[4+i]))
             #    self.newdeltas["A%d"%i] = float(recordList[4+i])
             #print self.newdeltas
-            
+
             self.deltas = {}
 
             # split string of deltas into individual An=0.0 strings
@@ -61,8 +61,8 @@ class Transaction:
             for string in deltastrings:
                 arg = string.split('=')
 
-                if (len(arg) == 2):
-                    if (arg[0] in self.settings.accounts()):
+                if len(arg) == 2:
+                    if arg[0] in self.settings.accounts():
                         acc = arg[0]
                     else:
                         #! Should ask for a new account name and add it
@@ -75,7 +75,7 @@ class Transaction:
 
             # Correct old 5 digit uids
             # Only need to do this once on any database, since the save fixes it permanently
-            while len(self.uid)<6:
+            while len(self.uid) < 6:
                 self.uid = "0%s" % self.uid
 
             self.resultingBalance = {}
@@ -86,7 +86,7 @@ class Transaction:
         lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
         output += "%9.2f " % self.value()
-        if (printID):
+        if printID:
             output += "%8s" % self.id
         output += "  %6s" % self.uid
         return output
@@ -96,7 +96,7 @@ class Transaction:
         """ Write transaction as a string to be printed """
         # Define the format string using the received inputs for column widths
 
-        if (totalValue is None):
+        if totalValue is None:
             totalValue = self.settings.totalvalues()
 
         if csv:
@@ -104,7 +104,7 @@ class Transaction:
         else:
             lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
-        if (totalValue):
+        if totalValue:
             if csv:
                 output += ",%f" % self.value()
             else:
@@ -121,13 +121,15 @@ class Transaction:
                     else:
                         output += "%9.2f " % this_value
                     if printBalances:
-                        if csv: output += ","
+                        if csv:
+                            output += ","
                         if acc in self.resultingBalance.keys():
                             output += "%9.2f" % self.resultingBalance[acc]
                         else:
                             output += "        "
-                        if not csv: output += " "
-        if (printID):
+                        if not csv:
+                            output += " "
+        if printID:
             if csv: output += ","
             output += "%8s" % self.id
         if csv:
@@ -160,9 +162,9 @@ class Transaction:
         """ Write the record in text file format for saving """
         record = "%s|%s|%s|%s|" % (self.date, self.type, self.dest, self.desc)
         for account, delta in self.deltas.iteritems():
-            if (delta != 0.0):
+            if delta != 0.0:
                 record += "%s=%.2f," % (account, float(delta))
-        if (record[:-1] == ","):
+        if record[:-1] == ",":
             record = record[:-1] # remove trailing comma
         record += "|%s|%s" % (self.id, self.uid)
         return record
@@ -185,7 +187,7 @@ class Transaction:
     def setRunningBalance(self, account, balance):
         """ Set the resulting balance of the account after this transaction """
         self.resultingBalance[account] = balance
-        return 
+        return
 
     def newUID(self):
         """ Generate a UID based on the current timestamp """
@@ -195,7 +197,7 @@ class Transaction:
 
         # Backwards timestamp to convert to base 62
         decimal = int(str(int(time()))[::-1])
-        
+
         #ibase = "0123456789"
         obase = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
         uid = ""
@@ -209,7 +211,7 @@ class Transaction:
             p += 1
 
         # Pad with zeros on the left to make exactly six digits long
-        while len(uid)<6:
+        while len(uid) < 6:
             uid = "0%s" % uid
 
         return uid
@@ -247,7 +249,7 @@ class Transaction:
                 else:
                     state -= 1
         # No idea what the "state" business is about
-                    
+
     def complete_type(self, text, state):
         """ Return possible types on tab """
         print self.settings.types().values()
@@ -266,13 +268,13 @@ class Transaction:
         # If no input is given on any field, the old value remains
 
         # Set up required stuff for tab-completion
-        import readline        
+        import readline
         readline.parse_and_bind("tab: complete")
 
         dateOK = False
-        
+
         while not dateOK:
-    
+
             # Get date
             prompt = "Date (%s): " % self.date
             dateString = raw_input(prompt)
@@ -293,11 +295,11 @@ class Transaction:
                     # assuming number is date only
                     inputDay = int(dateString)
                 elif ndash == 1:
-                    dateList = str.split(dateString,"-")
+                    dateList = str.split(dateString, "-")
                     inputMonth = int(dateList[0])
                     inputDay = int(dateList[1])
                 elif ndash == 2:
-                    dateList = str.split(dateString,"-")
+                    dateList = str.split(dateString, "-")
                     inputYear = int(dateList[0])
                     inputMonth = int(dateList[1])
                     inputDay = int(dateList[2])
@@ -305,7 +307,7 @@ class Transaction:
                     print "ERROR: did not understand date"
                     continue
 
-                #self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date        
+                #self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date
                 try:
                     self.date = date(inputYear, inputMonth, inputDay) # Transaction date
                 except:
@@ -317,7 +319,7 @@ class Transaction:
                     print 'WARNING: Date entered is greater than one week ago!'
                 # Otherwise date stays the same, which will be today if new transaction
             #endif
-        
+
             # if we got past all the continues above, then the date is OK
             dateOK = True
 
@@ -325,10 +327,10 @@ class Transaction:
 
         # Get transaction type
         types = self.settings.types() # [0]=key, [1]=value
-        
+
         # Try to complete type on tab
         readline.set_completer(self.complete_type)
-        
+
         for i in range(0, len(types)):
             optlist = "[%d] %s " % (i, types[i])
             print optlist,
@@ -345,7 +347,7 @@ class Transaction:
                 else:
                     print "WARNING: Type not recognized"
                     #! Should abort or retry or something
-                
+
 
         # Go to special transfer function if deltas not already defined
         if self.type == "Transfer" and len(self.deltas) == 0:
@@ -389,7 +391,7 @@ class Transaction:
         #    except:
         #        self.dest=answer
 
-        
+
         # Use predictive input on the description
         #! Can most recent be default? If so, what if I want a null description?
         predictions = self.database.predictDesc(self.dest, self.type, self.settings.npredict())
@@ -445,7 +447,7 @@ class Transaction:
     def inputTransfer(self):
         """ Automatically subtract from one account and add to the other """
         # Set up required stuff for tab-completion
-        import readline        
+        import readline
         readline.parse_and_bind("tab: complete")
 
         # First get the two accounts we're transfering between
@@ -469,7 +471,7 @@ class Transaction:
         if answer != "":
             dest = keys[int(answer)]
             self.dest = self.settings.accountName(dest)
-            
+
         if dest in self.settings.foreignAccountKeys() or source in self.settings.foreignAccountKeys():
             print "WARNING: Transfering between different currencies isn't well supported"
             print "         You will have to edit this record with -e to adjust the values"
@@ -490,8 +492,8 @@ class Transaction:
         answer = answer.strip()
         if answer != "":
             self.deltas[source] = float(answer)*-1
-            self.deltas[dest]   = float(answer)
-            
+            self.deltas[dest] = float(answer)
+
         # Get user specified ID
         prompt = "ID (%s): " % self.id
         answer = raw_input(prompt)

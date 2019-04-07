@@ -29,7 +29,7 @@ def plotwindow():
     # set up the window
     win = gtk.Window()
     #win.connect("destroy", lambda x: gtk.main_quit())
-    win.set_default_size(600,400)
+    win.set_default_size(600, 400)
     win.set_title("Snidget Plot")
 
     # make a vbox for controls
@@ -46,8 +46,8 @@ def plotwindow():
 
     # get the data
     weekly_integration = snidget.database.integrate(n=7)
-    dates=[]
-    deltas=[]
+    dates = []
+    deltas = []
     for datum in weekly_integration:
         dates.append(datum[0])
         deltas.append(datum[1])
@@ -63,5 +63,4 @@ def plotwindow():
     # show
     fig.canvas.draw()
     win.show_all()
-
 

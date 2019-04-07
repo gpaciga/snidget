@@ -30,18 +30,16 @@ class Database:
         recordFileName = settings.database()
         self.filename = "%s/%s" % (sys.path[0], recordFileName)
         #! If the file cannot be found, we should create it!
-        #recordFile = file(self.filename,'r')
         try:
-            recordFile = open(self.filename,'r')
+            recordFile = open(self.filename, 'r')
         except IOError:
             # Only open with write permissions if file does not exist yet
             print "Creating database file %s" % self.filename
             # For some reason r+ doesn't work to create the file
             # and have to open for write to create, close, and open for read
-            recordFile = open(self.filename,'w')
+            recordFile = open(self.filename, 'w')
             recordFile.close()
-            recordFile = open(self.filename,'r')
-            
+            recordFile = open(self.filename, 'r')
 
         self.records = []
         # Read in all the records of the file
@@ -87,7 +85,7 @@ class Database:
 
         # Determine appropriate column widths
         printID = False # Don't print the ID column unless there is data there
-        wType = 4       # Minimum column widths 
+        wType = 4       # Minimum column widths
         wDest = 8
         wDesc = 11
         wDate = 10
@@ -105,19 +103,16 @@ class Database:
         #wDesc+=2
 
         # Write out the header stuff for the table
-        #output  = "DATE         TYPE         LOCATION                   DESCRIPTION                            "
-        #divider = "----------   ----------   ------------------------   ------------------------------------   "
-
         # Make a format string with the right size arguments to the %s values
-        if (csv):
+        if csv:
             lineformat = "%s,%s,%s,%s"
         else:
             lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % ("DATE", "TYPE", "LOCATION", "DESCRIPTION")
         divider = "%s  %s  %s  %s  " % ("-"*wDate, "-"*wType, "-"*wDest, "-"*wDesc)
 
-        if (totalValue):
-            if (csv):
+        if totalValue:
+            if csv:
                 output += ",VALUE"
             else:
                 output += "  VALUE   "
@@ -125,26 +120,26 @@ class Database:
         else:
             for account in self.settings.accounts().itervalues():
                 if account not in self.settings.deletedAccountNames() and self.is_printable(account):
-                    if (csv):
+                    if csv:
                         output += ",%s" % (account)
                     else:
-                        if len(account)>7:
+                        if len(account) > 7:
                             account = account[0:7]
                         output += "%7s   " % account # Account names
                     divider += "-------   "
                     if printRunningBalances:
-                        if (csv):
+                        if csv:
                             output += ",Balance"
                         else:
                             output += "Balance  "
                         divider += "-------  "
-        if (printID):
-            if (csv):
+        if printID:
+            if csv:
                 output += ",ID"
             else:
-                output  += "    ID  "
+                output += "    ID  "
             divider += "------  "
-        if (csv):
+        if csv:
             output += ",UID\n"
         else:
             output += "   UID\n"
@@ -154,7 +149,9 @@ class Database:
         # Add the records to the database
         it = 1
         for record in printable:
-            output += record.__str__(totalValue=totalValue, printID=printID, wType=wType, wDest=wDest, wDesc=wDesc, printBalances=printRunningBalances, csv=csv)
+            output += record.__str__(totalValue=totalValue, printID=printID,
+                                     wType=wType, wDest=wDest, wDesc=wDesc,
+                                     printBalances=printRunningBalances, csv=csv)
             output += "\n"
             if not csv and it % 5 == 0:
                 output += "\n"
@@ -164,12 +161,12 @@ class Database:
         # print summary information only when not csv
         if not csv:
             # The number of spaces required to line up the Total labels correctly
-            colspace=2
+            colspace = 2
             balanceSpacing = wDate + wType + wDest + wDesc + (colspace*4) - 19
 
             # Print a line of account totals of visible records
             output += "%s Total visible:  " % (" "*balanceSpacing)
-            if (totalValue):
+            if totalValue:
                 #output += "%9.2f " % sum(balances['visible'].values())
                 output += "%9.2f " % balances['visible']['sum']
             else:
@@ -180,7 +177,7 @@ class Database:
 
             # Print a line of account totals over all records
             output += "%s Total balance:  " % (" "*balanceSpacing)
-            if (totalValue):
+            if totalValue:
                 #output += "%9.2f " % sum(balances['all'].values())
                 output += "%9.2f " % balances['all']['sum']
             else:
@@ -199,7 +196,7 @@ class Database:
             remaining = self.settings.allowance()+weekly
             output += "    Visible:    %9.2f   (%d records)\n" % (vistotal, len(printable))
             output += "    Balance:    %9.2f\n" % total
-            if (self.settings.allowance() > 0.0):
+            if self.settings.allowance() > 0.0:
                 output += "    This Week:  %9.2f\n" % weekly
                 output += "    Remaining:  %9.2f\n" % remaining
 
@@ -271,10 +268,10 @@ class Database:
         """ Rewrite the database to a txt, overwriting itself by default """
         if outname == "":
             outname = self.filename
-        outfile = file(outname,'w')
+        outfile = file(outname, 'w')
         outfile.write(self.encode())
         outfile.close()
-    
+
     #--------------------------------------------------------------------------
     # Functions for printing information about the database
     #--------------------------------------------------------------------------
@@ -310,7 +307,7 @@ class Database:
         wbalance['sum'] = 0.0
         for acc, value in balance.iteritems():
             # protect against the fact that 'sum' will be one of the accounts...
-            if ( acc != 'sum' ):
+            if acc != 'sum':
                 if acc in self.settings.foreignAccountKeys():
                     balance['sum'] += balance[acc]*self.settings.exchange(acc)
                     vbalance['sum'] += vbalance[acc]*self.settings.exchange(acc)
@@ -321,9 +318,11 @@ class Database:
                     wbalance['sum'] += wbalance[acc]
 
         # Return the result
-        result = { 'all':balance,
-                   'visible':vbalance,
-                   'thisweek':wbalance }
+        result = {
+            'all':balance,
+            'visible':vbalance,
+            'thisweek':wbalance
+        }
         return result
 
     def balancesByType(self):
@@ -356,7 +355,7 @@ class Database:
                 else:
                     balances[record.dest] += record.value()
 
-        balances = self.sortBalances(balances)                
+        balances = self.sortBalances(balances)
         return balances # this is a list of tuples
 
 
@@ -367,7 +366,7 @@ class Database:
         items.reverse()             # so largest is first
         # Our dictionary has become a list of tuples to maintain order
         #return [(k, v) for v, k in items]
-        # The GUI requires the value be a string. 
+        # The GUI requires the value be a string.
         return [(k, "%.2f" % v) for v, k in items]
 
 
@@ -379,7 +378,7 @@ class Database:
         self.applyFilters()
 
         values = []
-        
+
         total = 0.0
 
         balances = {}
@@ -388,7 +387,7 @@ class Database:
 
         self.sort(perm=False)
         dateSet = False
-        
+
         for record in self.records:
             if (visibleOnly == True and record.visible == True) or visibleOnly == False:
                 if dateSet == False:
@@ -401,7 +400,7 @@ class Database:
                     total += record.value()
                 else:
                     while thisDate != currentDate:
-                        thisValue = [ currentDate ]
+                        thisValue = [currentDate]
                         thisValue.extend(balances.values()) # was balances[:]
                         thisValue.append(total)
                         values.append(thisValue)
@@ -410,18 +409,18 @@ class Database:
                     for acc, delta in record.deltas.iteritems():
                         balances[acc] += delta
                     total += record.value()
-                    
-        thisValue = [ currentDate ]
+
+        thisValue = [currentDate]
         thisValue.extend(balances.values())
         thisValue.append(total)
         values.append(thisValue)
         #values.append((currentDate, balances[:], total))
         return values
-                
+
 
     def integrate(self, n=7, visibleOnly=True, independent=False):
         """ Return deltas integrated over previous n days, 7 by default """
-        
+
         from datetime import timedelta
 
         self.applyFilters()
@@ -433,7 +432,7 @@ class Database:
         dtotals = []
         for i in range(0, n):
             dtotals.append(0.0)
-        
+
         total = 0.0
 
         # We require the transactions to be in chronological order
@@ -461,7 +460,7 @@ class Database:
                             # Print every day if we don't care about keeping points independent
                             # Else just print every nth point
                             if (not independent) or (ndays%n == n-1):
-                                values.append((currentDate, sum(dtotals))) 
+                                values.append((currentDate, sum(dtotals)))
                                 total += sum(dtotals)
                         i = (i+1)%n
                         currentDate = currentDate+timedelta(1)
@@ -475,7 +474,7 @@ class Database:
 
         if ndays >= n:
             if (not independent) or (ndays%n == n-1):
-                values.append((currentDate, sum(dtotals))) 
+                values.append((currentDate, sum(dtotals)))
                 total += sum(dtotals)
 
         return values
@@ -495,7 +494,7 @@ class Database:
                         predictions.append(record.dest)
         # In case we didn't find n unique dests
         return predictions
-        
+
     def predictDesc(self, dest, type=None, n=1):
         """ Get the n last descriptions of a given dest """
         predictions = []
@@ -519,7 +518,7 @@ class Database:
             words.append(record.desc)
             words.append(record.dest)
         # convert to a set, removing duplicates, then back to a list
-        words = list(set(words))  
+        words = list(set(words))
         return words
 
     def places(self):
@@ -558,24 +557,24 @@ class Database:
     def filterType(self, type, flag=True):
         """ Filter records that match type """
         # Check if the first character is a negation
-        if str.find(type,self.settings.notchar()) == 0:
-            flag = not(flag)
+        if str.find(type, self.settings.notchar()) == 0:
+            flag = not flag
             type = type[1:]
-        types = str.split(type,',')
+        types = str.split(type, ',')
         for record in self.records:
             if record.visible == True and (record.type in types):
                 record.visible = flag
             elif record.visible == True:
-                record.visible = not(flag)
+                record.visible = not flag
 
     def filterRecipient(self, dest, flag=True):
         """ Filter records that match recipient """
-        recips = str.split(dest,',')
+        recips = str.split(dest, ',')
         for record in self.records:
             if record.visible == True and (record.dest in recips):
                 record.visible = flag
             elif record.visible == True:
-                record.visible = not(flag)
+                record.visible = not flag
 
     def filterUID(self, uid, flag=True):
         """ Filter for specific UID and only UID"""
@@ -583,7 +582,7 @@ class Database:
             if record.visible == True and record.uid == uid:
                 record.visible = flag
             elif record.visible == True:
-                record.visible = not(flag)
+                record.visible = not flag
 
     def filterString(self, filter, flag=True):
         """ Filter according to whether record description contains a string """
@@ -592,7 +591,7 @@ class Database:
                 if record.desc.find(filter) >= 0 or record.dest.find(filter) >= 0:
                     record.visible = flag
                 else:
-                    record.visible = not(flag)
+                    record.visible = not flag
 
     def filterWeek(self, n=1):
         """ Filter out records older than n weeks (default n=1) from today"""
@@ -607,22 +606,22 @@ class Database:
             return
         for record in self.records:
             if record.visible == True:
-                if valmin != None and record.value()<valmin:
+                if valmin != None and record.value() < valmin:
                     record.visible = not flag
-                if valmax != None and record.value()>valmax:
+                if valmax != None and record.value() > valmax:
                     record.visible = not flag
 
     def filterAccount(self, account, flag=True):
         """ Filter by requiring account delta is non-zero """
 
-        accounts = str.split(account,',')
+        accounts = str.split(account, ',')
         for account in accounts:
             # Get index of account we want. Will be same index as delta array.
             if account in self.settings.accountNames():
                 # Given the name we must find the key
                 key = 'KERROR' # this should never survive loop below since we already know the name exists
                 for acc, name in self.settings.accounts().iteritems():
-                    if (name == account):
+                    if name == account:
                         key = acc
                 # Now find records with non-zero deltas for this account
                 for record in self.records:
@@ -630,7 +629,7 @@ class Database:
                         if record.deltas[key] != 0.0 and record.visible == True:
                             record.visible = flag
                     elif record.visible == True:
-                        record.visible = not(flag)
+                        record.visible = not flag
             else:
                 print 'Account %s does not exist' % account
 
@@ -641,13 +640,13 @@ class Database:
 
         from datetime import timedelta
 
-        if (maxdate is None):
+        if maxdate is None:
             maxdate = self.settings.TODAY+timedelta(1)
 
         for record in self.records:
             if record.visible == True:
                 if record.date < mindate or record.date >= maxdate:
-                    record.visible = not(flag)
+                    record.visible = not flag
 
     def filterReset(self):
         """ Reset all records to print """
@@ -658,7 +657,7 @@ class Database:
     def filterInvert(self):
         """ Invert the current filters """
         for record in self.records:
-            record.visible = not(record.visible)
+            record.visible = not record.visible
 
     def applyFilters(self):
         """ Apply the entire filters dictionary to the database """
@@ -669,23 +668,23 @@ class Database:
 
         # Apply the date filter
         if self.filters['dates'] != None:
-            if str.find(self.filters['dates'],'W') == 0:
+            if str.find(self.filters['dates'], 'W') == 0:
                 # If filter starts with w, filter to number of weeks specified
                 # e.g. w52 for one year
                 self.filterWeek(int(self.filters['dates'][1:]))
             else:
                 # Else we should have the yyyy-mm-dd,yyyy-mm-dd format
                 # Get the two possible arguments
-                args = str.split(self.filters['dates'],",")
+                args = str.split(self.filters['dates'], ",")
 
                 # Get the first date
-                mindate = str.split(args[0],"-")
+                mindate = str.split(args[0], "-")
                 mindate = date(int(mindate[0]), int(mindate[1]), int(mindate[2]))
 
                 # Look for second date, and use it to set filter if it's there
                 try:
-                    maxdate = str.split(args[1],"-")
-                    maxdate = date(int(maxdate[0]), int(maxdate[1]), int(maxdate[2])) # Transaction date        
+                    maxdate = str.split(args[1], "-")
+                    maxdate = date(int(maxdate[0]), int(maxdate[1]), int(maxdate[2])) # Transaction date
                     self.filterDate(mindate, maxdate)
                 except:
                     self.filterDate(mindate)
@@ -694,7 +693,7 @@ class Database:
         if self.filters['accounts'] != None:
             # We print only the account in the string
             self.filterAccount(self.filters['accounts'])
-            
+
 
         # Apply the filter by type
         if self.filters['types'] != None:
@@ -709,19 +708,19 @@ class Database:
         if self.filters['string'] != None:
             #! Can we put multiple string filters in filter dictionary at once?
             #! eg for filter in self.filters['string']...
-            if (self.filters['string'][0] == self.settings.notchar()):
+            if self.filters['string'][0] == self.settings.notchar():
                 self.filterString(self.filters['string'][1:], flag=False)
             else:
                 self.filterString(self.filters['string'])
-            
+
 
         if self.filters['values'] != None:
-            values = str.split(self.filters['values'],',')
+            values = str.split(self.filters['values'], ',')
             if values[0] == '':
                 values[0] = None
             else:
                 values[0] = float(values[0])
-            if len(values)>1:
+            if len(values) > 1:
                 if values[1] == '':
                     values[1] = None
                 else:
@@ -730,7 +729,7 @@ class Database:
                 values.append(None) # add a values[1] spot
 
             # If values are out of order, flip them
-            if (values[0] != None) and (values[1] != None) and (values[1]<values[0]):
+            if (values[0] != None) and (values[1] != None) and (values[1] < values[0]):
                 minval = values[1]
                 values[1] = values[0]
                 values[0] = minval
@@ -740,7 +739,7 @@ class Database:
 
         # Remove the UIDs listed
         if self.filters['uid'] != None:
-            uids = str.split(self.filters['uid'],',')
+            uids = str.split(self.filters['uid'], ',')
             for uid in uids:
                 self.filterUID(uid, False)
 

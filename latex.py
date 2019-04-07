@@ -27,13 +27,11 @@ import snidget
 def output(database):
     """ Print database as latex table """
 #    snidget.database.resetFilters()
-    
+
     print "\\documentclass{article}"
     print "\\begin{document}"
     print "\\title{Expense Report}"
     print "\\author{Snidget V%s}" % snidget.__version__
-    
-
 
     #! Print balances at beginning of time period
     #! Print balances at end of time period
@@ -41,28 +39,25 @@ def output(database):
     # Get the range of dates from the filter
     if snidget.database.filters['dates'] != None:
 
-        if str.find(snidget.database.filters['dates'],'W') == 0:
+        if str.find(snidget.database.filters['dates'], 'W') == 0:
             n = int(snidget.database.filters['dates'][1:])
             start = snidget.settings.TODAY - snidget.settings.ONEWEEK*n
             end = snidget.settings.TODAY
             #print "\\date{%s to %s}" % (snidget.TODAY, snidget.TODAY-snidget.ONEWEEK*n)
-        
+
         else:
-            args = str.split(database.filters['dates'],",")
+            args = str.split(database.filters['dates'], ",")
             start = args[0]
             end = args[1]
             #print "\\date{%s to %s}" % (args[0], args[1])
-    
+
     else:
         start = snidget.database.records[0].date
-        end   = snidget.settings.TODAY
+        end = snidget.settings.TODAY
         #print "\\date{%s to %s}" % (database.records[0].date, snidget.TODAY)
-
-
 
     print "\\date{%s to %s}" % (start, end)
     print "\\maketitle"
-
 
     # Print summary of types
 
@@ -83,8 +78,6 @@ def output(database):
     #print "  \\end{center}"
     #print "\\end{table}"
 
-
-
     for type in snidget.settings.types():
         print "\\section{%s}" % type
         database.filters['types'] = type
@@ -94,15 +87,13 @@ def output(database):
         print "    \\hline"
         print "    \\hline"
         for dest in snidget.database.balancesByRecipient():
-            name = dest[0].replace("&","\&")
+            name = dest[0].replace("&", "\&")
             value = dest[1]
             print "         %-30s & %10s \\\\" % (name, value)
         print "    \\hline"
         print "  \\end{tabular}"
 
-
-
     print "\\end{document}"
 
-
 #end def output
+

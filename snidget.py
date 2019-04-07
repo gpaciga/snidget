@@ -39,7 +39,7 @@ import getopt # to parse command line options
 import settings
 import database
 
-__version__ = "4.2.1"
+__version__ = "4.1-beta"
 
 # Load the user settings and database
 settings = settings.Settings()
@@ -51,7 +51,7 @@ def usage():
     usageFile = file(usageFilename)
     output = ''
     for line in usageFile:
-        output += line 
+        output += line
     return output
 # end def usage
 
@@ -74,7 +74,7 @@ def parseArgs(argv):
         elif opt == "-c":
             # Print current balances of all accounts
             balances = database.balances()['all']
-            total=0.0
+            total = 0.0
             for acc in settings.accounts().iterkeys():
                 if acc not in settings.deletedAccountKeys():
                     if acc in settings.foreignAccountKeys():
@@ -101,7 +101,7 @@ def parseArgs(argv):
             total = 0.0
             num = 0
             try:
-                n=int(arg)
+                n = int(arg)
             except:
                 print "Invalid option: -d " + arg
             for datapoint in database.integrate(n):
@@ -114,7 +114,7 @@ def parseArgs(argv):
 
         elif opt == "-e":
             # Edit an entry identified by uid=arg
-            entries=str.split(arg,',')
+            entries = str.split(arg, ',')
             for entry in entries:
                 database.edit(entry)
             database.save()
@@ -133,11 +133,11 @@ def parseArgs(argv):
             print transaction.Transaction(database, settings).uid 
 
         elif opt == "-f":
-            if (arg == "latex"):
+            if arg == "latex":
                 # Print a latex report
                 import latex
                 latex.output(database)
-            elif (arg == "csv"):
+            elif arg == "csv":
                 # Print in CSV
                 print database.__str__(csv=True)
             else:
@@ -149,9 +149,9 @@ def parseArgs(argv):
             database.save()
 
         elif opt == "-o":
-            if (settings.edit(arg)):
+            if settings.edit(arg):
                 settings.save()
-            
+
 
         elif opt == "-p":
             # Print the database as it currently stands
@@ -163,9 +163,9 @@ def parseArgs(argv):
 
         elif opt == "-r":
             # Print recipients
-            destsum=0.0
+            destsum = 0.0
             for dest in database.balancesByRecipient():
-                destsum+=float(dest[1])
+                destsum += float(dest[1])
                 print "  %-35s %9.2f" % (dest[0], float(dest[1]))
             print "  ============================================="
             print "  %35s %9.2f" % (" ", destsum)
@@ -177,9 +177,9 @@ def parseArgs(argv):
 
         elif opt == "-t":
             # Print types
-            typesum=0.0
+            typesum = 0.0
             for type in database.balancesByType():
-                typesum+=float(type[1])
+                typesum += float(type[1])
                 print "  %-35s %9.2f" % (type[0], float(type[1]))
             print "  ============================================="
             print "  %35s %9.2f" % (" ", typesum)
@@ -207,7 +207,7 @@ def parseArgs(argv):
 
         elif opt == "-x":
             # Delete a record by uid
-            uids = str.split(arg.rstrip(),",")            
+            uids = str.split(arg.rstrip(), ",")
             for uid in uids:
                 database.delete(uid)
             database.save()
@@ -289,6 +289,4 @@ if __name__ == "__main__":
         start_gui()
     else:
         parseArgs(sys.argv[1:])
-
-
 
