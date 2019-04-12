@@ -1,4 +1,4 @@
-snidget V4.1(beta)
+snidget v4.2.1(beta)
 Usage: snidget.py [args]
 
 Call with no arguments to get the graphical user interface.
@@ -23,7 +23,7 @@ COMMANDS are run from left to right, until either all complete or a fatal error 
   -u	      Update the exchange rates for all currencies. Run with only "-u -o save" to commit to settings.
   -v          Same as -p, but prints only the total value of the record (or vise versa if this is default)
   -w          Prints the total values of the last seven days for every day in range. Same as '-d 7'.
-  -x uid      Delete record specified by uid. 
+  -x uid      Delete record specified by uid.
 
 FILTERS change what transactions are printed, effective until the program terminates. Order might matter.
   -A account  Print only transactions involving the specified account.
