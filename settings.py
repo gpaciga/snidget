@@ -15,7 +15,6 @@
 import urllib2
 import json
 from datetime import date, timedelta
-from time import time
 import sys
 import os
 import pickle
@@ -23,12 +22,11 @@ import pickle
 class Settings:
     """ Manage and store user settings """
 
-
     # Set some convenient constants
     TODAY = date.today()
     ONEWEEK = timedelta(7)
 
-    UPDATEDRATES = False
+    updated_rates = False
 
     # This is the default set of options
     # These will be overwritten if settings.pkl exists
@@ -99,24 +97,24 @@ class Settings:
         """ Load options from an existing file or read in defaults """
 
         if filename is None:
-            self.OPTIONSFILE = "%s/%s" % (sys.path[0], 'settings.pkl')
-            filename = self.OPTIONSFILE
+            self.options_file = "%s/%s" % (sys.path[0], 'settings.pkl')
+            filename = self.options_file
 
         if os.path.exists(filename):
             # First backup the default options
             defaults = self.options
             # Now load the saved options
-            optionsPickle = open(filename, 'rb')
-            self.options = pickle.load(optionsPickle)
-            optionsPickle.close()
+            options_pickle = open(filename, 'rb')
+            self.options = pickle.load(options_pickle)
+            options_pickle.close()
 
             # Now go through and add any options that are new since the last save
-            doSave = False
+            do_save = False
             for opt, val in defaults.iteritems():
                 if opt not in self.options:
                     print "Adding new option "+opt
                     self.options[opt] = val
-                    doSave = True
+                    do_save = True
             # Similarly, remove options that are no longer needed
             # remembering you can't remove items during an interation
             delete = []
@@ -126,7 +124,7 @@ class Settings:
             for opt in delete:
                 print "Removing defunct option "+opt
                 self.options.pop(opt)
-                doSave = True
+                do_save = True
 
             # We need to also go through the special case of the FILTERS
             # This is basically duplicate code and could be cleaned up....
@@ -134,7 +132,7 @@ class Settings:
                 if filt not in self.options['FILTERS']:
                     print "Adding new filter "+filt
                     self.options['FILTERS'][filt] = val
-                    doSave = True
+                    do_save = True
             delete = []
             for filt, val in self.options['FILTERS'].iteritems():
                 if filt not in defaults['FILTERS']:
@@ -142,19 +140,19 @@ class Settings:
             for filt in delete:
                 print "Removing defunct filter "+filt
                 self.options['FILTERS'].pop(filt)
-                doSave = True
+                do_save = True
 
             if not self.options['historicalRates']:
                 self.options['historicalRates'][date(1970, 01, 01)] = self.options['exchangeRates']
 
             # Settings were updated so we must save
-            if doSave:
+            if do_save:
                 self.save()
 
         else:
-            optionsPickle = open(filename, 'wb')
-            pickle.dump(self.options, optionsPickle)
-            optionsPickle.close()
+            options_pickle = open(filename, 'wb')
+            pickle.dump(self.options, options_pickle)
+            options_pickle.close()
             print "Pickled default options. You should not get this message again."
     # end def init
 
@@ -199,14 +197,14 @@ class Settings:
     def save(self, filename=None):
         """ Save current options into file """
 
-        self.saveHistoricalRates() # will only save if rates are up to date
+        self.save_historical_rates() # will only save if rates are up to date
 
         if filename is None:
-            filename = self.OPTIONSFILE
+            filename = self.options_file
 
-        optionsPickle = open(filename, 'wb')
-        pickle.dump(self.options, optionsPickle)
-        optionsPickle.close()
+        options_pickle = open(filename, 'wb')
+        pickle.dump(self.options, options_pickle)
+        options_pickle.close()
         print "Saved options"
     #end def save
 
@@ -214,7 +212,7 @@ class Settings:
         """ Change an option """
 
         # Keep track of whether a change is made
-        changedOptions = False
+        changed_options = False
 
         args = str.split(command, '=')
 
@@ -223,7 +221,7 @@ class Settings:
             print self
             return
         elif args[0] == 'save':
-            self.saveFilters()
+            self.save_filters()
             return
         elif args[0] == 'help':
             print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
@@ -247,7 +245,7 @@ class Settings:
             print "  print                   Special command to print the current options in an ugly way."
             print "  help                    Print this help."
             return
-        elif (len(args) != 2):
+        elif len(args) != 2:
             print "Options must be changed using command=argument format. Use -o help for recognized options."
             return
 
@@ -258,108 +256,108 @@ class Settings:
 
         # Change the database file name
         if command == 'database':
-            oldDatabase = self.database()
-            self.setDatabase(arg)
-            print "Changed database from '%s' to '%s'" % (oldDatabase, self.database())
-            changedOptions = True
+            old_database = self.database()
+            self.set_database(arg)
+            print "Changed database from '%s' to '%s'" % (old_database, self.database())
+            changed_options = True
 
         #   maxprint=integer
         elif command == 'maxprint':
-            oldMaxprint = self.maxprint()
-            self.setMaxprint(arg)
-            print "Changed maxprint from '%s' to '%s'" % (oldMaxprint, self.maxprint())
-            changedOptions = True
+            old_maxprint = self.maxprint()
+            self.set_maxprint(arg)
+            print "Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint())
+            changed_options = True
 
         #   allowance=float
         elif command == 'allowance':
-            oldAllowance = self.allowance()
-            self.setAllowance(arg)
-            print "Changed allowance from '%s' to '%s'" % (oldAllowance, self.allowance())
-            changedOptions = True
+            old_allowance = self.allowance()
+            self.set_allowance(arg)
+            print "Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance())
+            changed_options = True
 
         #   totalvalues=boolean
         elif command == 'totalvalues':
-            oldTotalValues = self.totalvalues()
+            old_total_values = self.total_values()
             if arg == "True" or arg == "true":
-                self.setTotalvalues(True)
+                self.set_total_values(True)
             else:
-                self.setTotalvalues(False)
-            print "Changed totalvalues from '%s' to '%s'" % (oldTotalValues, self.totalvalues())
-            changedOptions = True
+                self.set_total_values(False)
+            print "Changed totalvalues from '%s' to '%s'" % (old_total_values, self.totalvalues())
+            changed_options = True
 
         #   not=x
         elif command == 'not':
             valid = True
-            oldNot = self.notchar()
+            old_not = self.not_character()
             if len(arg) != 1:
                 print "NOT character must be a single character"
                 valid = False
             if arg in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789":
                 print "Alphanumeric characters not recommended for the NOT character"
                 valid = False
-            if valid is True and arg != oldNot:
-                self.setNot(arg)
-                print "Changed not character from %s to %s" % (oldNot, self.notchar())
-                changedOptions = True
+            if valid is True and arg != old_not:
+                self.set_not_character(arg)
+                print "Changed not character from %s to %s" % (old_not, self.not_character())
+                changed_options = True
 
         #   addplace=string
         elif command == 'addplace':
-            if self.addPlace(arg):
+            if self.add_place(arg):
                 print "Added '%s' to places" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Place %s already exists" % arg
 
         #   delplace=string
         elif command == 'delplace':
-            if self.delPlace(arg):
+            if self.del_place(arg):
                 print "Removed '%s' from places" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Place not found: %s" % arg
 
         #   addtype=word
         elif command == 'addtype':
-            if self.addType(arg):
+            if self.add_type(arg):
                 print "Added '%s' to types" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Type %s already exists" % arg
 
         #   deltype=word
         elif command == 'deltype':
-            if self.delType(arg):
+            if self.del_type(arg):
                 print "Removed type %s" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Could not remove type %s" % arg
 
         #   addaccount=word
         elif command == 'addaccount':
-            if self.addAccount(arg):
+            if self.add_account(arg):
                 print "Added account %s" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Could not add account %s" % arg
 
         #   delaccount=word
         elif command == 'delaccount':
-            if self.delAccount(arg):
+            if self.del_account(arg):
                 print "Deleted account %s" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Could not delete account %s" % arg
 
         elif command == 'addforeign':
-            if self.addForeign(arg):
+            if self.add_foreign(arg):
                 print "Added foreign account %s" % arg
-                changedOptions = True
+                changed_options = True
             else:
                 print "Could not add account %s" % arg
 
         elif command == 'getexchange':
-            if self.setExchange(arg, self.getExchangeRate(arg)):
-                changedOptions = True
+            if self.set_exchange(arg, self.get_exchange_rate(arg)):
+                changed_options = True
             else:
                 print "Could not set exchange rate"
 
@@ -370,24 +368,24 @@ class Settings:
                 rate = float(args[1])
             except:
                 print "Could not parse argument %s" % arg
-            if self.setExchange(currency, rate):
-                changedOptions = True
+            if self.set_exchange(currency, rate):
+                changed_options = True
             else:
                 print "Could not set exchange rate of %s" % currency
 
         elif command == 'renameaccount':
-            # self.renameAccount(oldname, newname)
+            # self.rename_account(oldname, newname)
             print "Cannot rename accounts yet"
 
         else:
             print "Unrecognized command. Use -o help for recognized commands."
 
         # If anything changed, this will be true
-        return changedOptions
+        return changed_options
     #end def edit
 
 
-    def newAccountKey(self):
+    def new_account_key(self):
         """ Create a unique key for a new account """
         i = 0
         while True:
@@ -436,17 +434,17 @@ class Settings:
         return self.options['accounts']
 
 
-    def accountKeys(self):
+    def account_keys(self):
         """ Return a list of account codes """
         return self.options['accounts'].keys()
 
 
-    def accountNames(self):
+    def account_names(self):
         """ Return a list of account names """
         return self.options['accounts'].values()
 
 
-    def visibleAccounts(self):
+    def visible_accounts(self):
         """ Return the accounts dictionary with only visible accounts """
         visible = {}
         for acc, name in self.options['accounts'].iteritems():
@@ -455,7 +453,7 @@ class Settings:
         return visible
 
 
-    def visibleAccountKeys(self):
+    def visible_account_keys(self):
         """ Return the keys of visible accounts """
         visible = []
         for key in self.options['accounts'].keys():
@@ -464,7 +462,7 @@ class Settings:
         return visible
 
 
-    def visibleAccountNames(self):
+    def visible_account_names(self):
         """ Return the visible account names """
         visible = []
         for acc, name in self.options['accounts'].iteritems():
@@ -473,12 +471,12 @@ class Settings:
         return visible
 
 
-    def foreignAccountKeys(self):
+    def foreign_account_keys(self):
         """ Return the foreign account keys """
         return self.options['foreignCurrencies'].keys()
 
 
-    def accountKey(self, name):
+    def account_key(self, name):
         """ Return an account key given its name """
         for key, value in self.options['accounts'].iteritems():
             if value == name:
@@ -486,26 +484,26 @@ class Settings:
         return False
 
 
-    def accountName(self, key):
+    def account_name(self, key):
         """ Return an account name given its key """
         return self.options['accounts'][key]
 
 
-    def deletedAccounts(self):
+    def deleted_accounts(self):
         """ Alias for deletedAccountKeys """
-        return self.deletedAccountKeys()
+        return self.deleted_account_keys()
 
 
-    def deletedAccountKeys(self):
+    def deleted_account_keys(self):
         """ Return a list of keys of accounts which have been deleted """
         return self.options['deletedAccounts']
 
 
-    def deletedAccountNames(self):
+    def deleted_account_names(self):
         """ Return a list of names of accounts which have been deleted """
         names = []
-        for key in self.deletedAccountKeys():
-            names.append(self.accountName(key))
+        for key in self.deleted_account_keys():
+            names.append(self.account_name(key))
         return names
 
 
@@ -517,31 +515,31 @@ class Settings:
             return self.options['types'][ind]
 
 
-    def postypes(self):
+    def positive_types(self):
         """ Return list of positive types """
         return self.options['postypes']
 
 
-    def protectedTypes(self):
+    def protected_types(self):
         """ Return types which can not be removed """
         protected = ["Income", "Transfer", "Adjustment"]
         return protected
 
 
-    def extypes(self):
+    def expense_types(self):
         """ Return types which are considered expenses """
         return self.options['extypes']
 
 
-    def extypesString(self):
+    def expense_types_string(self):
         """ Return expense types as a comma separated string """
-        filter = ''
-        for type in self.options['extypes']:
-            if type in self.types():
-                filter = filter + ',' + type
-        if str.find(filter, ',') == 0:
-            filter = filter[1:]
-        return filter
+        filter_string = ''
+        for expense_type in self.options['extypes']:
+            if expense_type in self.types():
+                filter_string = filter_string + ',' + expense_type
+        if str.find(filter_string, ',') == 0:
+            filter_string = filter_string[1:]
+        return filter_string
 
 
     def places(self, ind=None):
@@ -557,7 +555,7 @@ class Settings:
         return self.options['FILTERS']
 
 
-    def totalvalues(self):
+    def total_values(self):
         """ Return the totalValues setting """
         return self.options['TOTALVALUES']
 
@@ -572,12 +570,12 @@ class Settings:
         return self.options['ALLOWANCE']
 
 
-    def npredict(self):
+    def number_to_predict(self):
         """ Return the default number of predictions """
         return self.options['NPREDICT']
 
 
-    def predictdest(self):
+    def predict_destination(self):
         """ Return a boolean indicating whether we want to predict destinations """
         return self.options['DOPREDICTDEST']
 
@@ -587,12 +585,12 @@ class Settings:
         return self.options['DATABASE']
 
 
-    def notchar(self):
+    def not_character(self):
         """ Return the not character """
         return self.options['NOTCHAR']
 
 
-    def isForeign(self, acc):
+    def is_foreign(self, acc):
         """ Return where an account is foreign """
         if acc in self.options['foreignCurrencies'].keys():
             return True
@@ -602,26 +600,26 @@ class Settings:
 
     def exchange(self, acc):
         """ Return the exchange rate of an account """
-        if self.isForeign(acc):
+        if self.is_foreign(acc):
             currency = self.options['foreignCurrencies'][acc]
             return self.options['exchangeRates'][currency]
         else:
             return 1.00
 
 
-    def getExchangeRate(self, currency, data=False):
+    def get_exchange_rate(self, currency, data=False):
         """ Return the conversion to multiply the foreign currency by to get the default currency """
-        currencyFrom = currency
-        currencyTo = self.options['defaultCurrency']
+        currency_from = currency
+        currency_to = self.options['defaultCurrency']
         # if being called multiple times, should provide data so as to not call the API every time
         if data is False:
-            data = self.getOpenExchangeRates()
-        defaultRate = data['rates'][currencyTo]
-        destinationRate = data['rates'][currencyFrom]
-        return float(defaultRate/destinationRate)
+            data = self.get_open_exchange_rates()
+        default_rate = data['rates'][currency_to]
+        destination_rate = data['rates'][currency_from]
+        return float(default_rate/destination_rate)
 
 
-    def getOpenExchangeRates(self):
+    def get_open_exchange_rates(self):
         """ Use open exchange rate API to get exchange rates """
         apiURL = 'https://openexchangerates.org/api/latest.json?app_id=07da2e05cce04ac48280eb00ce9e3eca'
         response = urllib2.urlopen(apiURL)
@@ -629,19 +627,19 @@ class Settings:
         return data
 
 
-    def updateExchanges(self):
+    def update_exchanges(self):
         """ Update all the exchange rates using Google """
-        rates = self.getOpenExchangeRates()
+        rates = self.get_open_exchange_rates()
         for currency in self.options['exchangeRates'].iterkeys():
-            rate = self.getExchangeRate(currency, data=rates)
+            rate = self.get_exchange_rate(currency, data=rates)
             if rate is not False:
-                self.setExchange(currency, rate)
-        self.UPDATEDRATES = True
+                self.set_exchange(currency, rate)
+        self.updated_rates = True
 
 
-    def saveHistoricalRates(self):
+    def save_historical_rates(self):
         """ Add the current exchange rates to the historical record """
-        if self.UPDATEDRATES is True:
+        if self.updated_rates is True:
             self.options['historicalRates'][self.TODAY] = self.options['exchangeRates']
         else:
             print "Exchange rates have not been updated. Since they are out of date, they will not be saved as today's rates."
@@ -652,37 +650,37 @@ class Settings:
     # --------------------------------------------------------------------------------
     # These return either True or False indicating whether they were successful
 
-    def setDatabase(self, filename):
+    def set_database(self, filename):
         """ Set the database file name """
         self.options['DATABASE'] = filename
         return True
 
 
-    def setMaxprint(self, maxval):
+    def set_maxprint(self, maxval):
         """ Set the maxprint """
         self.options['MAXPRINT'] = int(maxval)
         return True
 
 
-    def setAllowance(self, value):
+    def set_allowance(self, value):
         """ Set the weekly allowance """
         self.options['ALLOWANCE'] = float(value)
         return True
 
 
-    def setTotalvalues(self, arg):
+    def set_total_values(self, arg):
         """ Set the totalvalues switch """
         self.options['TOTALVALUES'] = bool(arg)
         return True
 
 
-    def setNot(self, arg):
+    def set_not_character(self, arg):
         """ Set the NOT character """
         self.options['NOTCHAR'] = arg
         return True
 
 
-    def addPlace(self, name):
+    def add_place(self, name):
         """ Add a place to the saved suggestions """
         if name in self.places():
             return False
@@ -691,7 +689,7 @@ class Settings:
             return True
 
 
-    def delPlace(self, name):
+    def del_place(self, name):
         """ Remove a place from the saved suggestions """
         if name in self.places():
             self.options['places'].remove(name)
@@ -700,7 +698,7 @@ class Settings:
             return False
 
 
-    def addType(self, type):
+    def add_type(self, type):
         """ Add a type """
         if type in self.types():
             self.options['types'].append(type)
@@ -709,10 +707,10 @@ class Settings:
             return False
 
 
-    def delType(self, type):
+    def del_type(self, type):
         """ Delete a type """
         if type in self.types():
-            if type not in self.protectedTypes():
+            if type not in self.protected_types():
                 self.options['types'].remove(type)
                 return True
             else:
@@ -722,21 +720,21 @@ class Settings:
             return False
 
 
-    def addAccount(self, name):
+    def add_account(self, name):
         """ Add an account """
-        if name not in self.accountNames():
-            self.options['accounts'][self.newAccountKey()] = name
+        if name not in self.account_names():
+            self.options['accounts'][self.new_account_key()] = name
             return True
         else:
-            if name in self.deletedAccountNames():
-                self.undelAccount(name)
+            if name in self.deleted_account_names():
+                self.undel_account(name)
                 return True
             else:
                 print "That account name already exists"
                 return False
 
 
-    def addForeign(self, args):
+    def add_foreign(self, args):
         """ Add an account in a foreign currency """
         args = args.split(":")
         try:
@@ -749,18 +747,18 @@ class Settings:
         name = args[0]
         currency = args[1].upper()
 
-        if self.addAccount(name) is False:
+        if self.add_account(name) is False:
             # Adding account must have failed
             return False
 
         # Get the key of the account we just made
-        acc = self.accountKey(name)
+        acc = self.account_key(name)
 
         # Set the account currency
         self.options['foreignCurrencies'][acc] = currency
 
         # Try to get the exchange rate
-        rate = self.getExchangeRate(currency)
+        rate = self.get_exchange_rate(currency)
         if rate is False:
             print "Could not get exchange rate. Please set the exchange rate manually."
             rate = 0.0
@@ -773,7 +771,7 @@ class Settings:
         return True
 
 
-    def setExchange(self, currency, rate):
+    def set_exchange(self, currency, rate):
         if currency in self.options['exchangeRates'].keys():
             self.options['exchangeRates'][currency] = rate
             print "Set exchange rate of %s to %f" % (currency, rate)
@@ -783,39 +781,39 @@ class Settings:
             return False
 
 
-    def undelAccount(self, name):
+    def undel_account(self, name):
         """ Undelete an account """
-        key = self.accountKey(name)
-        if key in self.deletedAccountKeys():
+        key = self.account_key(name)
+        if key in self.deleted_account_keys():
             self.options['deletedAccounts'].remove(key)
             return True
         else:
             return False
 
 
-    def delAccount(self, name):
+    def del_account(self, name):
         """ Delete an account """
         #! If we delete an account that has no transactions, we could forget its name permanently...
         #! If we delete an account that does have transactions, we can either forget its name and have a problem when reading the database,
         #!          or save its name to come back later, possibly as a suggestion when reading the database again
-        if ((name in self.accountNames()) and (name not in self.deletedAccountNames())):
-            key = self.accountKey(name)
+        if ((name in self.account_names()) and (name not in self.deleted_account_names())):
+            key = self.account_key(name)
             self.options['deletedAccounts'].append(key)
             return True
         return False
 
 
-    def renameAccount(self, oldname, newname):
+    def rename_account(self, oldname, newname):
         """ Rename an account """
-        if oldname in self.accountNames():
-            key = self.accountKey(oldname)
+        if oldname in self.account_names():
+            key = self.account_key(oldname)
             self.options['accounts'][key] = newname
             return True
         else:
             return False
 
 
-    def saveFilters(self):
+    def save_filters(self):
         print "Setting default filters: %s" % self.filters_str()
         self.save()
 

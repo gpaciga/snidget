@@ -25,10 +25,10 @@ database = database.Database(settings)
 
 def usage():
     """ Return the USAGE file as a string """
-    usageFilename = "%s/%s" % (sys.path[0], 'USAGE')
-    usageFile = file(usageFilename)
+    usage_filename = "%s/%s" % (sys.path[0], 'USAGE')
+    usage_file = file(usage_filename)
     output = ''
-    for line in usageFile:
+    for line in usage_file:
         output += line
     return output
 # end def usage
@@ -36,7 +36,7 @@ def usage():
 # Unused option letters:
 #  jklmyz GHIJKMOPQYZ
 
-def parseArgs(argv):
+def parse_args(argv):
     """ Process command line arguments. """
     try:
         opts, args = getopt.getopt(argv, "acbd:e:f:ghino:pqrstuvwx:A:B:C:D:EF:L:N:RS:T:UV:WX:", [])
@@ -54,18 +54,18 @@ def parseArgs(argv):
             balances = database.balances()['all']
             total = 0.0
             for acc in settings.accounts().iterkeys():
-                if acc not in settings.deletedAccountKeys():
-                    if acc in settings.foreignAccountKeys():
-                        print "%-15s %12.2f = %12.2f" % (settings.accountName(acc), balances[acc], balances[acc]*settings.exchange(acc))
+                if acc not in settings.deleted_account_keys():
+                    if acc in settings.foreign_account_keys():
+                        print "%-15s %12.2f = %12.2f" % (settings.account_name(acc), balances[acc], balances[acc]*settings.exchange(acc))
                         total += balances[acc]*settings.exchange(acc)
                     else:
-                        print "%-15s %12.2s   %12.2f" % (settings.accountName(acc), "", balances[acc])
+                        print "%-15s %12.2s   %12.2f" % (settings.account_name(acc), "", balances[acc])
                         total += balances[acc]
             print "%-15s %12.2s   ============" % ("", "")
             print "%-15s %12.2s   %12.2f" % ("Total", "", total)
 
         elif opt == "-b":
-            for datapoint in database.integrateDeltas():
+            for datapoint in database.integrate_deltas():
                 output = ""
                 output += "%s " % datapoint[0]
                 for i in range(0, len(settings.accounts())+1): # +1 because we have a column for the total
@@ -121,7 +121,7 @@ def parseArgs(argv):
 
         elif opt == "-n":
             # Create a new entry in the database
-            database.newRecord()
+            database.new_record()
             database.save()
 
         elif opt == "-o":
@@ -135,12 +135,12 @@ def parseArgs(argv):
 
         elif opt == "-q":
             # Include a running tally of each account
-            print database.__str__(printRunningBalances=True)
+            print database.__str__(print_running_balances=True)
 
         elif opt == "-r":
             # Print recipients
             destsum = 0.0
-            for dest in database.balancesByRecipient():
+            for dest in database.balances_by_recipient():
                 destsum += float(dest[1])
                 print "  %-35s %9.2f" % (dest[0], float(dest[1]))
             print "  ============================================="
@@ -154,19 +154,19 @@ def parseArgs(argv):
         elif opt == "-t":
             # Print types
             typesum = 0.0
-            for type in database.balancesByType():
-                typesum += float(type[1])
-                print "  %-35s %9.2f" % (type[0], float(type[1]))
+            for expense_type in database.balances_by_type():
+                typesum += float(expense_type[1])
+                print "  %-35s %9.2f" % (expense_type[0], float(expense_type[1]))
             print "  ============================================="
             print "  %35s %9.2f" % (" ", typesum)
 
         elif opt == "-u":
             print "Updating all exchange rates from Google (but you must save explicitly with -o save!)"
-            settings.updateExchanges()
+            settings.update_exchanges()
 
         elif opt == "-v":
             # Like -p but print values, not individual accounts
-            print database.__str__(totalValue=not(settings.totalvalues()))
+            print database.__str__(total_value = not settings.total_values())
 
         elif opt == "-w":
             # Integrate over n days, defaults to 7.
@@ -207,11 +207,11 @@ def parseArgs(argv):
 
         elif opt == "-E":
             # Remove everything except expense
-            database.filters['types'] = settings.extypesString()
+            database.filters['types'] = settings.expense_types_string()
 
         elif opt == "-F":
             # Exclude records of type arg by appending the negation character
-            database.filters['types'] = settings.notchar()+arg
+            database.filters['types'] = settings.not_character()+arg
 
         elif opt == "-S":
             # Print only records containing string arg
@@ -226,7 +226,7 @@ def parseArgs(argv):
             database.filters['maxprint'] = int(arg)
 
         elif opt == "-R":
-            database.resetFilters()
+            database.reset_filters()
 
         elif opt == "-T":
             # Print only type arg
@@ -251,7 +251,7 @@ def parseArgs(argv):
         #If we ever get around to using long options:
         #elif opt in ("-t", "--test"):
         #and you have to do something else for --test=value type args
-# end def parseArgs
+# end def parse_args
 
 def start_gui():
     snidget_gui = gui.SnidgetGUI()
@@ -264,5 +264,4 @@ if __name__ == "__main__":
         import gui
         start_gui()
     else:
-        parseArgs(sys.argv[1:])
-
+        parse_args(sys.argv[1:])

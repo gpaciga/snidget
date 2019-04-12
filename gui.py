@@ -154,8 +154,8 @@ class SnidgetGUI:
         acc_frames = []
         acc_adjusts = []
         acc_spinners = []
-        for acc in snidget.settings.visibleAccounts():
-            this_frame = gtk.Frame(snidget.settings.accountName(acc))
+        for acc in snidget.settings.visible_accounts():
+            this_frame = gtk.Frame(snidget.settings.account_name(acc))
             if record.deltas.has_key(acc):
                 this_delta = record.deltas[acc]
             else:
@@ -183,20 +183,20 @@ class SnidgetGUI:
             record.type = types[type_menu.get_active()]
             record.dest = entry_location.get_text()
             record.desc = entry_description.get_text()
-            for ind in range(0, len(snidget.settings.visibleAccounts())):
+            for ind in range(0, len(snidget.settings.visible_accounts())):
                 value = acc_spinners[ind].get_value()
                 if value != 0.0:
-                    if record.type in snidget.settings.postypes():
-                        record.deltas[snidget.settings.visibleAccountKeys()[ind]] = value
+                    if record.type in snidget.settings.positive_types():
+                        record.deltas[snidget.settings.visible_account_keys()[ind]] = value
                     else:
-                        record.deltas[snidget.settings.visibleAccountKeys()[ind]] = value*-1.0
+                        record.deltas[snidget.settings.visible_account_keys()[ind]] = value*-1.0
             record.id = entry_id.get_text()
 
             if is_new:
                 snidget.database.add(record)
 
             #! Dialog might have completed correctly without changes
-            snidget.database.isChanged = True
+            snidget.database.is_changed = True
 
             self.set_status("Added record with UID %s" % record.uid)
             #! Would be nice to only update the one row
@@ -360,13 +360,13 @@ class SnidgetGUI:
         # Recall that accounts are given by NAME in the filter
         current_accounts = snidget.database.filters['accounts']
         if current_accounts is None:
-            current_accounts = snidget.settings.accountNames()
+            current_accounts = snidget.settings.account_names()
         else:
             current_accounts = current_accounts.split(',')
 
         # Add all the types to the dialog, checked or not
         account_checks = []
-        for account in snidget.settings.accountNames():
+        for account in snidget.settings.account_names():
             this_check = gtk.CheckButton(label=account)
             if account in current_accounts:
                 this_check.set_active(True)
@@ -388,7 +388,7 @@ class SnidgetGUI:
             new_accounts = ''
             for ind in range(0, len(account_checks)):
                 if account_checks[ind].get_active() is True:
-                    new_accounts += snidget.settings.accountNames()[ind] + ','
+                    new_accounts += snidget.settings.account_names()[ind] + ','
 
             # Cut off the last comma
             new_accounts = new_accounts[0:-1]
@@ -604,14 +604,14 @@ class SnidgetGUI:
 
     def call_showall(self, widget, data):
         """ Write table with no filters """
-        snidget.database.resetFilters()
+        snidget.database.reset_filters()
         self.set_status("Reset all filters.")
         self.write_table()
 
 
     def call_defaults(self, widget, data):
         """ Write table with default filters """
-        snidget.database.setFilterDefaults()
+        snidget.database.set_filter_defaults()
         self.set_status("Applied default filters.")
         self.write_table()
 
@@ -664,14 +664,12 @@ class SnidgetGUI:
 
 
     def call_download(self, widget, data):
-        #! Error correction? Warnings? Ask for details?
-        snidget.database.downloadRecords()
-        self.write_table(saveState=False)
+        print "Not implemented."
 
 
     def call_sort(self, widget, data):
         snidget.database.sort()
-        self.write_table(saveState=False)
+        self.write_table(save_state=False)
 
 
     # --------------------------------------------------------------------------
@@ -691,19 +689,19 @@ class SnidgetGUI:
 
 
     def menu_recipients(self, action):
-        self.displayMode = "Recipients"
+        self.display_mode = "Recipients"
         self.set_status("Viewing by recipient")
         self.write_table()
 
 
     def menu_types(self, action):
-        self.displayMode = "Types"
+        self.display_mode = "Types"
         self.set_status("Viewing by type")
         self.write_table()
 
 
     def menu_transactions(self, action):
-        self.displayMode = "Transactions"
+        self.display_mode = "Transactions"
         self.set_status("Viewing by transaction")
         self.write_table()
 
@@ -719,39 +717,39 @@ class SnidgetGUI:
     def save_state(self):
         """ Push current state onto history """
         state = {
-            'mode': self.displayMode,
+            'mode': self.display_mode,
             'filters': snidget.database.filters.copy(),
             'status': self.status_text
         }
 
         # Drop things in the forward direction
-        self.history = self.history[0:self.historyIndex+1]
+        self.history = self.history[0:self.history_index+1]
         self.history.append(state) # add our state to the end
-        self.historyIndex = len(self.history) - 1 #record out new position in the history
+        self.history_index = len(self.history) - 1 #record out new position in the history
 
 
     def back_state(self):
         """ Move back one step in the view history """
-        if self.historyIndex > 0:
+        if self.history_index > 0:
             # move one down in the history list
-            self.historyIndex = self.historyIndex - 1
+            self.history_index = self.history_index - 1
             # Load the state
-            state = self.history[self.historyIndex]
-            self.displaymode = state['mode']
+            state = self.history[self.history_index]
+            self.display_mode = state['mode']
             snidget.database.filters = state['filters']
             self.set_status(state['status'])
-            self.write_table(saveState=False)
+            self.write_table(save_state=False)
 
 
     def forward_state(self):
         """ Move forward one step in the view history """
-        if self.historyIndex < len(self.history) - 1:
-            self.historyIndex = self.historyIndex + 1
-            state = self.history[self.historyIndex]
-            self.displayMode = state['mode']
+        if self.history_index < len(self.history) - 1:
+            self.history_index = self.history_index + 1
+            state = self.history[self.history_index]
+            self.display_mode = state['mode']
             snidget.database.filters = state['filters']
             self.set_status(state['status'])
-            self.write_table(saveState=False)
+            self.write_table(save_state=False)
 
 
     # --------------------------------------------------------------------------
@@ -761,21 +759,21 @@ class SnidgetGUI:
     def get_table(self):
         """ Write the database into a ListStore for TreeView """
         listmodel = gtk.ListStore(object)
-        snidget.database.applyFilters()
+        snidget.database.apply_filters()
         for record in snidget.database.records:
             if record.visible:
                 listmodel.append([record])
         return listmodel
 
 
-    def write_table(self, saveState=True):
+    def write_table(self, save_state=True):
         """ Set the TreeView with the current database """
 
         # First we need to save the current state
-        if saveState:
+        if save_state:
             self.save_state()
 
-        if self.displayMode == "Transactions":
+        if self.display_mode == "Transactions":
             # Now get the new listmodel
             listmodel = self.get_table()
             self.treeview.set_model(listmodel)
@@ -784,9 +782,9 @@ class SnidgetGUI:
             #! Is there not a function I can define?
             self.treeview.set_tooltip_column(0)
             return
-        elif self.displayMode == "Types":
+        elif self.display_mode == "Types":
             print "Don't know how to write table in this display mode"
-        elif self.displayMode == "Recipients":
+        elif self.display_mode == "Recipients":
             print "Don't know how to write table in this display mode"
         else:
             print "Don't know this display mode"
@@ -808,14 +806,13 @@ class SnidgetGUI:
         model = treemodeliter[0]
         it = treemodeliter[1]
 
-
-        if self.displayMode == "Transactions":
+        if self.display_mode == "Transactions":
             record = model.get_value(it, 0)
             # Now we can act on the record
             self.dialog_edit(record)
-        elif self.displayMode == "Types":
+        elif self.display_mode == "Types":
             pass
-        elif self.displayMode == "Recipients":
+        elif self.display_mode == "Recipients":
             pass
         else:
             print "Error: display mode not recognized on double click."
@@ -838,7 +835,7 @@ class SnidgetGUI:
 
     def quit_program(self):
         ok = True # will be made False if save dialog canceled
-        if snidget.database.isChanged is True:
+        if snidget.database.is_changed is True:
             ok = self.dialog_save()
             # We will be quitting if OK, so print the "Saved" message to the terminal
             if ok is True:
@@ -861,9 +858,9 @@ class SnidgetGUI:
     def __init__(self):
 
         # Internals
-        self.displayMode = "Transactions"
+        self.display_mode = "Transactions"
         self.history = [] # to save view history
-        self.historyIndex = 0
+        self.history_index = 0
         self.status_text = '' # because there's no gtk.StatusBar.get_text()?
 
         # Gui
@@ -1061,16 +1058,16 @@ class SnidgetGUI:
         #! Need to make columns flexible for different view modes
         column_names = snidget.database.headings()
         self.tvcolumn = [None] * len(column_names)
-        for n in range(0, len(column_names)):
+        for index in range(0, len(column_names)):
             cell = gtk.CellRendererText()
-            self.tvcolumn[n] = gtk.TreeViewColumn(column_names[n], cell)
-            if n > 3:
+            self.tvcolumn[n] = gtk.TreeViewColumn(column_names[index], cell)
+            if index > 3:
                 cell.set_property('xalign', 1.0)
-            self.tvcolumn[n].set_cell_data_func(cell, self.cell_value, n)
-            self.tvcolumn[n].set_resizable(True)
-            if n < 4 and n > 0:
-                self.tvcolumn[n].set_expand(True)
-            self.treeview.append_column(self.tvcolumn[n])
+            self.tvcolumn[index].set_cell_data_func(cell, self.cell_value, index)
+            self.tvcolumn[index].set_resizable(True)
+            if index < 4 and index > 0:
+                self.tvcolumn[index].set_expand(True)
+            self.treeview.append_column(self.tvcolumn[index])
 
         self.treeview.connect('row-activated', self.row_doubleclick)
 
@@ -1104,4 +1101,3 @@ class SnidgetGUI:
 if __name__ == "__main__":
     snidget = SnidgetGUI()
     snidget.main()
-

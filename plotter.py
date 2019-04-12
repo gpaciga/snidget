@@ -42,4 +42,3 @@ def plotwindow():
     # show
     fig.canvas.draw()
     win.show_all()
-

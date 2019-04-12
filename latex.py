@@ -5,13 +5,13 @@
 
 #! Would be nice to write a more general option, which would just print the same thing as
 #! the straight up -p version, but with latex markup for adding to a document,
-#  (while keeping the option to have \begin{document} etc type markup). 
+#  (while keeping the option to have \begin{document} etc type markup).
 
 import snidget
 
 def output(database):
     """ Print database as latex table """
-#    snidget.database.resetFilters()
+#    snidget.database.reset_filters()
 
     print "\\documentclass{article}"
     print "\\begin{document}"
@@ -25,8 +25,8 @@ def output(database):
     if snidget.database.filters['dates'] != None:
 
         if str.find(snidget.database.filters['dates'], 'W') == 0:
-            n = int(snidget.database.filters['dates'][1:])
-            start = snidget.settings.TODAY - snidget.settings.ONEWEEK*n
+            num_weeks = int(snidget.database.filters['dates'][1:])
+            start = snidget.settings.TODAY - snidget.settings.ONEWEEK*num_weeks
             end = snidget.settings.TODAY
             #print "\\date{%s to %s}" % (snidget.TODAY, snidget.TODAY-snidget.ONEWEEK*n)
 
@@ -56,22 +56,22 @@ def output(database):
     #print "    \\textbf{Type} & \\multicolumn{2}{c}{\\textbf{Total}} \\\\"
     print "    \\textbf{Type} & \\textbf{Total} \\\\"
     print "    \\hline"
-    for type in snidget.database.balancesByType():
-        print "       %-14s & %10s \\\\" % type
+    for expense_type in snidget.database.balances_by_type():
+        print "       %-14s & %10s \\\\" % expense_type
     print "    \\hline"
     print "  \\end{tabular}"
     #print "  \\end{center}"
     #print "\\end{table}"
 
-    for type in snidget.settings.types():
-        print "\\section{%s}" % type
-        database.filters['types'] = type
+    for expense_type in snidget.settings.types():
+        print "\\section{%s}" % expense_type
+        database.filters['types'] = expense_type
         print "  \\begin{tabular}{lr}"
         print "    \\hline"
         print "    \\textbf{Destination} & \\textbf{Total} \\\\"
         print "    \\hline"
         print "    \\hline"
-        for dest in snidget.database.balancesByRecipient():
+        for dest in snidget.database.balances_by_recipient():
             name = dest[0].replace("&", "\&")
             value = dest[1]
             print "         %-30s & %10s \\\\" % (name, value)
@@ -81,4 +81,3 @@ def output(database):
     print "\\end{document}"
 
 #end def output
-

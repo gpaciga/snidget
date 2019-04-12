@@ -6,44 +6,44 @@ import readline
 
 class Transaction:
     """ Transaction class, containing info on individual transactions"""
-    def __init__(self, database, settings, recordString=""):
+    def __init__(self, database, settings, record_string=""):
         """ Parse a string into a new transaction, or create an empty one """
         self.database = database
         self.settings = settings
-        if recordString == "":
+        if record_string == "":
             self.date = self.settings.TODAY
             self.type = ""
             self.dest = ""
             self.desc = ""
             self.deltas = {}
-            self.resultingBalance = {}
+            self.resulting_balance = {}
             self.id = ""
-            self.uid = self.newUID()
+            self.uid = self.new_uid()
             self.visible = True
 
         else:
             #Split the string, with trailing whitespace (including \n) removed
-            recordList = str.split(recordString.rstrip(), "|")
+            record_list = str.split(record_string.rstrip(), "|")
 
-            dateList = str.split(recordList[0], "-")
-            self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date
+            date_list = str.split(record_list[0], "-")
+            self.date = date(int(date_list[0]), int(date_list[1]), int(date_list[2])) # Transaction date
 
-            self.type = recordList[1] # Type
-            self.dest = recordList[2] # Destination/Location
-            self.desc = recordList[3] # Description
+            self.type = record_list[1] # Type
+            self.dest = record_list[2] # Destination/Location
+            self.desc = record_list[3] # Description
 
             # If these strings are empty, should make 0
             #self.deltas=[]
             #self.newdeltas={}
             #for i in range(0,NACCOUNTS):
-            #    self.deltas.append(float(recordList[4+i]))
-            #    self.newdeltas["A%d"%i] = float(recordList[4+i])
+            #    self.deltas.append(float(record_list[4+i]))
+            #    self.newdeltas["A%d"%i] = float(record_list[4+i])
             #print self.newdeltas
 
             self.deltas = {}
 
             # split string of deltas into individual An=0.0 strings
-            deltastrings = recordList[4].split(',')
+            deltastrings = record_list[4].split(',')
             for string in deltastrings:
                 arg = string.split('=')
 
@@ -56,48 +56,48 @@ class Transaction:
                     delta = arg[1]
                     self.deltas[acc] = float(delta)
 
-            self.id = recordList[5] # ID
-            self.uid = recordList[6]  # Unique ID
+            self.id = record_list[5] # ID
+            self.uid = record_list[6]  # Unique ID
 
             # Correct old 5 digit uids
             # Only need to do this once on any database, since the save fixes it permanently
             while len(self.uid) < 6:
                 self.uid = "0%s" % self.uid
 
-            self.resultingBalance = {}
+            self.resulting_balance = {}
             self.visible = True
 
-    def strValue(self, printID=True, wDate=10, wType=9, wDest=24, wDesc=34):
+    def str_value(self, print_id=True, w_date=10, w_type=9, w_dest=24, w_desc=34):
         """ Write transaction as a string, including only the total value """
-        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
+        lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (w_date, w_type, w_dest, w_desc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
         output += "%9.2f " % self.value()
-        if printID:
+        if print_id:
             output += "%8s" % self.id
         output += "  %6s" % self.uid
         return output
 
 
-    def __str__(self, totalValue=None, printID=True, wDate=10, wType=9, wDest=24, wDesc=34, printBalances=False, csv=False):
+    def __str__(self, total_value=None, print_id=True, w_date=10, w_type=9, w_dest=24, w_desc=34, print_balances=False, csv=False):
         """ Write transaction as a string to be printed """
         # Define the format string using the received inputs for column widths
 
-        if totalValue is None:
-            totalValue = self.settings.totalvalues()
+        if total_value is None:
+            total_value = self.settings.total_values()
 
         if csv:
             lineformat = '%s,%s,"%s","%s"' # quotes around destination and description, which can have commas themselves
         else:
-            lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (wDate, wType, wDest, wDesc)
+            lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (w_date, w_type, w_dest, w_desc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
-        if totalValue:
+        if total_value:
             if csv:
                 output += ",%f" % self.value()
             else:
                 output += "%9.2f " % self.value()
         else:
             for acc in self.settings.accounts():
-                if acc not in self.settings.deletedAccountKeys() and self.database.is_printable(acc):
+                if acc not in self.settings.deleted_account_keys() and self.database.is_printable(acc):
                     if acc in self.deltas.keys():
                         this_value = self.deltas[acc]
                     else:
@@ -106,16 +106,16 @@ class Transaction:
                         output += ",%f" % this_value
                     else:
                         output += "%9.2f " % this_value
-                    if printBalances:
+                    if print_balances:
                         if csv:
                             output += ","
-                        if acc in self.resultingBalance.keys():
-                            output += "%9.2f" % self.resultingBalance[acc]
+                        if acc in self.resulting_balance.keys():
+                            output += "%9.2f" % self.resulting_balance[acc]
                         else:
                             output += "        "
                         if not csv:
                             output += " "
-        if printID:
+        if print_id:
             if csv: output += ","
             output += "%8s" % self.id
         if csv:
@@ -156,26 +156,26 @@ class Transaction:
         return record
 
     def edit(self):
-        """ Alias for inputValues """
-        self.inputValues()
+        """ Alias for input_values """
+        self.input_values()
 
     def value(self):
         """ Return total value of transaction """
         #return sum(self.deltas.values())
         total = 0.0
         for acc, value in self.deltas.iteritems():
-            if acc in self.settings.foreignAccountKeys():
+            if acc in self.settings.foreign_account_keys():
                 total += value*self.settings.exchange(acc)
             else:
                 total += value
         return total
 
-    def setRunningBalance(self, account, balance):
+    def set_running_balance(self, account, balance):
         """ Set the resulting balance of the account after this transaction """
-        self.resultingBalance[account] = balance
+        self.resulting_balance[account] = balance
         return
 
-    def newUID(self):
+    def new_uid(self):
         """ Generate a UID based on the current timestamp """
         # Note this is one direction only
 
@@ -245,7 +245,7 @@ class Transaction:
                     state -= 1
         # No idea what the "state" business is about
 
-    def inputValues(self):
+    def input_values(self):
         """ Get transaction details from keyboard input """
 
         # Default values are what already exists in the transaction
@@ -254,45 +254,45 @@ class Transaction:
         # Set up required stuff for tab-completion
         readline.parse_and_bind("tab: complete")
 
-        dateOK = False
+        date_ok = False
 
-        while not dateOK:
+        while not date_ok:
 
             # Get date
             prompt = "Date (%s): " % self.date
-            dateString = raw_input(prompt)
-            dateString = dateString.strip()
+            date_string = raw_input(prompt)
+            date_string = date_string.strip()
 
-            if dateString != "":
+            if date_string != "":
                 # from number of dashes, figure out what type of input we got
-                ndash = dateString.count("-")
+                num_dashes = date_string.count("-")
 
                 # set the defaults
-                inputDay = self.date.day
-                inputMonth = self.date.month
-                inputYear = self.date.year
+                input_day = self.date.day
+                input_month = self.date.month
+                input_year = self.date.year
 
-                if ndash == 0:
+                if num_dashes == 0:
                     # assuming number is date only
-                    inputDay = int(dateString)
-                elif ndash == 1:
-                    dateList = str.split(dateString, "-")
-                    inputMonth = int(dateList[0])
-                    inputDay = int(dateList[1])
-                elif ndash == 2:
-                    dateList = str.split(dateString, "-")
-                    inputYear = int(dateList[0])
-                    inputMonth = int(dateList[1])
-                    inputDay = int(dateList[2])
+                    input_day = int(date_string)
+                elif num_dashes == 1:
+                    date_list = str.split(date_string, "-")
+                    input_month = int(date_list[0])
+                    input_day = int(date_list[1])
+                elif num_dashes == 2:
+                    date_list = str.split(date_string, "-")
+                    input_year = int(date_list[0])
+                    input_month = int(date_list[1])
+                    input_day = int(date_list[2])
                 else:
                     print "ERROR: did not understand date"
                     continue
 
-                #self.date = date(int(dateList[0]), int(dateList[1]), int(dateList[2])) # Transaction date
+                #self.date = date(int(date_list[0]), int(date_list[1]), int(date_list[2])) # Transaction date
                 try:
-                    self.date = date(inputYear, inputMonth, inputDay) # Transaction date
+                    self.date = date(input_year, input_month, input_day) # Transaction date
                 except:
-                    print "ERROR: could not interpret %d-%d-%d" % (inputYear, inputMonth, inputDay)
+                    print "ERROR: could not interpret %d-%d-%d" % (input_year, input_month, input_day)
                     continue
 
                 # Warn if entered date is a long time ago. Might be, e.g., a typo in the year.
@@ -302,7 +302,7 @@ class Transaction:
             #endif
 
             # if we got past all the continues above, then the date is OK
-            dateOK = True
+            date_ok = True
 
         #endwhile
 
@@ -332,14 +332,14 @@ class Transaction:
 
         # Go to special transfer function if deltas not already defined
         if self.type == "Transfer" and len(self.deltas) == 0:
-            self.inputTransfer()
+            self.input_transfer()
             # and deltas is empty...
             return
 
 
         # Depending on settings, get fixed list of places or dynamic prediction
-        if self.settings.predictdest():
-            places = self.database.predictDest(self.type, self.settings.npredict())
+        if self.settings.predict_destination():
+            places = self.database.predict_destination(self.type, self.settings.number_to_predict())
         else:
             places = self.settings.places()
 
@@ -375,7 +375,7 @@ class Transaction:
 
         # Use predictive input on the description
         #! Can most recent be default? If so, what if I want a null description?
-        predictions = self.database.predictDesc(self.dest, self.type, self.settings.npredict())
+        predictions = self.database.predict_description(self.dest, self.type, self.settings.number_to_predict())
         for i in range(0, len(predictions)):
             optlist = "[%d] %s " % (i, predictions[i])
             print optlist,
@@ -399,7 +399,7 @@ class Transaction:
 
         for acc, name in self.settings.accounts().iteritems():
             # Get default value for this account, if it already exists in deltas
-            if acc not in self.settings.deletedAccountKeys() and self.database.is_printable(acc):
+            if acc not in self.settings.deleted_account_keys() and self.database.is_printable(acc):
                 if acc in self.deltas:
                     value = self.deltas[acc]
                 else:
@@ -408,7 +408,7 @@ class Transaction:
                 answer = raw_input(prompt)
                 answer = answer.strip()
                 if answer != "":
-                    if self.type in self.settings.postypes():
+                    if self.type in self.settings.positive_types():
                         self.deltas[acc] = float(answer)
                     else:
                         self.deltas[acc] = float(answer)*-1
@@ -425,19 +425,19 @@ class Transaction:
         print self.uid
 
 
-    def inputTransfer(self):
+    def input_transfer(self):
         """ Automatically subtract from one account and add to the other """
         # Set up required stuff for tab-completion
         readline.parse_and_bind("tab: complete")
 
         # First get the two accounts we're transfering between
-        allkeys = self.settings.accountKeys()
+        allkeys = self.settings.account_keys()
         keys = []
         for key in allkeys:
             if self.database.is_printable(key):
                 keys.append(key)
         for i in range(0, len(keys)):
-            optlist = "[%d] %s " % (i, self.settings.accountName(keys[i]))
+            optlist = "[%d] %s " % (i, self.settings.account_name(keys[i]))
             print optlist,
         print
         prompt = "From: "
@@ -450,9 +450,9 @@ class Transaction:
         answer = answer.strip()
         if answer != "":
             dest = keys[int(answer)]
-            self.dest = self.settings.accountName(dest)
+            self.dest = self.settings.account_name(dest)
 
-        if dest in self.settings.foreignAccountKeys() or source in self.settings.foreignAccountKeys():
+        if dest in self.settings.foreign_account_keys() or source in self.settings.foreign_account_keys():
             print "WARNING: Transfering between different currencies isn't well supported"
             print "         You will have to edit this record with -e to adjust the values"
 
@@ -488,8 +488,8 @@ class Transaction:
     def tuple(self):
         """ Output record as tuple for GUI """
         output = [str(self.date), self.type, self.dest, self.desc]
-        for acc in self.settings.accountKeys():
-            if acc not in self.settings.deletedAccountKeys():
+        for acc in self.settings.account_keys():
+            if acc not in self.settings.deleted_account_keys():
                 if acc in self.deltas.keys():
                     output.append('%.2f' % self.deltas[acc])
                 else:
