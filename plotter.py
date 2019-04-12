@@ -1,13 +1,8 @@
-#! make this a class.... need self. stuff to hold data for various functions?
-
-import snidget
-
-#import numpy as np
-#import matplotlib.pyplot as plt
-
 import gtk
 from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
 from matplotlib.figure import Figure
+
+import snidget
 
 def plotwindow():
     # set up the window

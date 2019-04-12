@@ -1,5 +1,9 @@
 """ Defines transaction class, containing info on individual transactions"""
 
+from datetime import date
+from time import time
+import readline
+
 class Transaction:
     """ Transaction class, containing info on individual transactions"""
     def __init__(self, database, settings, recordString=""):
@@ -18,8 +22,6 @@ class Transaction:
             self.visible = True
 
         else:
-            from datetime import date
-
             #Split the string, with trailing whitespace (including \n) removed
             recordList = str.split(recordString.rstrip(), "|")
 
@@ -65,7 +67,7 @@ class Transaction:
             self.resultingBalance = {}
             self.visible = True
 
-    def strValue(self, printID=True, wDate=10, wType=9, wDest=24, wDesc=34): 
+    def strValue(self, printID=True, wDate=10, wType=9, wDest=24, wDesc=34):
         """ Write transaction as a string, including only the total value """
         lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (wDate, wType, wDest, wDesc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
@@ -76,7 +78,7 @@ class Transaction:
         return output
 
 
-    def __str__(self, totalValue=None, printID=True, wDate=10, wType=9, wDest=24, wDesc=34, printBalances=False, csv=False): 
+    def __str__(self, totalValue=None, printID=True, wDate=10, wType=9, wDest=24, wDesc=34, printBalances=False, csv=False):
         """ Write transaction as a string to be printed """
         # Define the format string using the received inputs for column widths
 
@@ -177,8 +179,6 @@ class Transaction:
         """ Generate a UID based on the current timestamp """
         # Note this is one direction only
 
-        from time import time
-
         # Backwards timestamp to convert to base 62
         decimal = int(str(int(time()))[::-1])
 
@@ -252,7 +252,6 @@ class Transaction:
         # If no input is given on any field, the old value remains
 
         # Set up required stuff for tab-completion
-        import readline
         readline.parse_and_bind("tab: complete")
 
         dateOK = False
@@ -265,8 +264,6 @@ class Transaction:
             dateString = dateString.strip()
 
             if dateString != "":
-                from datetime import date
-
                 # from number of dashes, figure out what type of input we got
                 ndash = dateString.count("-")
 
@@ -431,7 +428,6 @@ class Transaction:
     def inputTransfer(self):
         """ Automatically subtract from one account and add to the other """
         # Set up required stuff for tab-completion
-        import readline
         readline.parse_and_bind("tab: complete")
 
         # First get the two accounts we're transfering between

@@ -1,5 +1,15 @@
 # GTK+ GUI for Snidget
 
+from datetime import date, timedelta
+import sys
+import pygtk
+pygtk.require('2.0')
+import gtk
+
+import snidget
+import transaction
+import plotter
+
 #! special transfer dialog
 #! dialog for user settings
 #! Add and delete types
@@ -14,12 +24,6 @@
 
 #! Totals
 #! Tooltips
-
-import pygtk
-pygtk.require('2.0')
-import gtk
-import snidget
-
 
 class SnidgetGUI:
 
@@ -62,7 +66,6 @@ class SnidgetGUI:
 
         # Get the record or get a new record
         if record is None:
-            import transaction
             record = transaction.Transaction(snidget.database, snidget.settings)
             is_new = True # use to know whether to add or not
         else:
@@ -174,7 +177,6 @@ class SnidgetGUI:
 
         if response == gtk.RESPONSE_OK:
             #! Error correction???
-            from datetime import date
             record.date = date(spinner_year.get_value_as_int(),
                                spinner_month.get_value_as_int(),
                                spinner_day.get_value_as_int())
@@ -404,9 +406,6 @@ class SnidgetGUI:
 
     def dialog_date(self):
         """ Dialog to set the Date range """
-
-        from datetime import timedelta
-        from datetime import date
 
         dialog = gtk.MessageDialog(None,
                                    gtk.DIALOG_MODAL | gtk.DIALOG_DESTROY_WITH_PARENT,
@@ -653,7 +652,6 @@ class SnidgetGUI:
 
 
     def call_plot(self, widget, data):
-        import plotter
         plotter.plotwindow()
 
 
@@ -874,7 +872,6 @@ class SnidgetGUI:
         self.window.set_border_width(0)
         self.window.set_default_size(1000, 600)
 
-        import sys
         self.window.set_icon_from_file("%s/%s" % (sys.path[0], "snidget.png"))
 
         #icon = gtk.Image()

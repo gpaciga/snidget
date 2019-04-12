@@ -12,12 +12,17 @@
 #! Add a way to print the current filters alone in a nice way
 #! and to save the current filters as the default
 
+import urllib2
+import json
+from datetime import date, timedelta
+from time import time
+import sys
+import os
+import pickle
+
 class Settings:
     """ Manage and store user settings """
 
-    from datetime import date
-    from datetime import timedelta
-    from time import time
 
     # Set some convenient constants
     TODAY = date.today()
@@ -93,10 +98,6 @@ class Settings:
     def __init__(self, filename=None):
         """ Load options from an existing file or read in defaults """
 
-        import sys
-        import os
-        import pickle
-
         if filename is None:
             self.OPTIONSFILE = "%s/%s" % (sys.path[0], 'settings.pkl')
             filename = self.OPTIONSFILE
@@ -144,7 +145,6 @@ class Settings:
                 doSave = True
 
             if not self.options['historicalRates']:
-                from datetime import date
                 self.options['historicalRates'][date(1970, 01, 01)] = self.options['exchangeRates']
 
             # Settings were updated so we must save
@@ -198,9 +198,6 @@ class Settings:
 
     def save(self, filename=None):
         """ Save current options into file """
-
-        #import os
-        import pickle
 
         self.saveHistoricalRates() # will only save if rates are up to date
 
@@ -626,8 +623,6 @@ class Settings:
 
     def getOpenExchangeRates(self):
         """ Use open exchange rate API to get exchange rates """
-        import urllib2
-        import json
         apiURL = 'https://openexchangerates.org/api/latest.json?app_id=07da2e05cce04ac48280eb00ce9e3eca'
         response = urllib2.urlopen(apiURL)
         data = json.load(response)

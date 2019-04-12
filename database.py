@@ -1,5 +1,9 @@
 """ Defines Database class which contains and organizes all transaction records."""
 
+import sys
+from datetime import timedelta, date
+import transaction
+
 # Defines Database class, the main workhorse in the Snidget program
 # It is basically a container object for all the transactions on record,
 # including the functions for determining which records to show when printed
@@ -8,8 +12,6 @@ class Database:
     """ Database class, which holds and organizes transactions."""
     def __init__(self, settings):
         """ Create a new database from the given filename """
-        import sys
-        import transaction
         self.settings = settings
         recordFileName = settings.database()
         self.filename = "%s/%s" % (sys.path[0], recordFileName)
@@ -197,7 +199,6 @@ class Database:
 
     def newRecord(self):
         """ Make a new record, get user input for it, and add to the database"""
-        import transaction
         new = transaction.Transaction(self, self.settings)
         try:
             new.inputValues()
@@ -357,8 +358,6 @@ class Database:
     def integrateDeltas(self, visibleOnly=True):
         """ Provides actual balance of the accounts as a function of time """
 
-        from datetime import timedelta
-
         self.applyFilters()
 
         values = []
@@ -404,8 +403,6 @@ class Database:
 
     def integrate(self, n=7, visibleOnly=True, independent=False):
         """ Return deltas integrated over previous n days, 7 by default """
-
-        from datetime import timedelta
 
         self.applyFilters()
 
@@ -585,7 +582,6 @@ class Database:
 
     def filterValue(self, valmin=None, valmax=None, flag=True):
         """ Filter out records with less than total abs(value) val """
-        #import math # not necessary?
         if valmin is None and valmax is None:
             return
         for record in self.records:
@@ -622,8 +618,6 @@ class Database:
         """ Include anything between mindate up to but not including maxdate """
         # Takes two DATES for now
 
-        from datetime import timedelta
-
         if maxdate is None:
             maxdate = self.settings.TODAY+timedelta(1)
 
@@ -645,9 +639,6 @@ class Database:
 
     def applyFilters(self):
         """ Apply the entire filters dictionary to the database """
-        from datetime import date
-        #from datetime import timedelta
-
         self.filterReset()
 
         # Apply the date filter

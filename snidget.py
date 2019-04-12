@@ -11,14 +11,14 @@
 
 import sys # to get command line options
 import getopt # to parse command line options
-#from datetime import date
-#from datetime import timedelta
-#from time import time
 
 import settings
 import database
+import transaction
+import latex
+import gui
 
-__version__ = "4.1-beta"
+__version__ = "4.2.1"
 
 # Load the user settings and database
 settings = settings.Settings()
@@ -107,14 +107,12 @@ def parseArgs(argv):
 
         elif opt == "-i":
             # Print a new record UID
-            # newUID() has a 'self' arg so can't just call Transaction.newUID() --- change that? 
-            import transaction
-            print transaction.Transaction(database, settings).uid 
+            # newUID() has a 'self' arg so can't just call Transaction.newUID() --- change that?
+            print transaction.Transaction(database, settings).uid
 
         elif opt == "-f":
             if arg == "latex":
                 # Print a latex report
-                import latex
                 latex.output(database)
             elif arg == "csv":
                 # Print in CSV
@@ -257,7 +255,6 @@ def parseArgs(argv):
 # end def parseArgs
 
 def start_gui():
-    import gui
     snidget_gui = gui.SnidgetGUI()
     snidget_gui.main()
 
