@@ -16,7 +16,6 @@ import settings
 import database
 import transaction
 import latex
-import gui
 
 __version__ = "4.2.1"
 
@@ -262,6 +261,7 @@ def start_gui():
 # Else, parse the args
 if __name__ == "__main__":
     if len(sys.argv[1:]) == 0:
+        import gui
         start_gui()
     else:
         parseArgs(sys.argv[1:])
