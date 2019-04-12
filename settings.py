@@ -105,7 +105,7 @@ class Settings:
             # First backup the default options
             defaults = self.options
             # Now load the saved options
-            optionsPickle = open(filename, 'rb')          
+            optionsPickle = open(filename, 'rb')
             self.options = pickle.load(optionsPickle)
             optionsPickle.close()
 
@@ -621,7 +621,7 @@ class Settings:
             data = self.getOpenExchangeRates()
         defaultRate = data['rates'][currencyTo]
         destinationRate = data['rates'][currencyFrom]
-	return float(defaultRate/destinationRate)
+        return float(defaultRate/destinationRate)
 
 
     def getOpenExchangeRates(self):
@@ -636,7 +636,7 @@ class Settings:
 
     def updateExchanges(self):
         """ Update all the exchange rates using Google """
-	rates = self.getOpenExchangeRates()
+        rates = self.getOpenExchangeRates()
         for currency in self.options['exchangeRates'].iterkeys():
             rate = self.getExchangeRate(currency, data=rates)
             if rate is not False:

@@ -62,7 +62,7 @@ class Database:
         for record in self.records:
             if record.visible:
                 all_printable.append(record)
-	if maxprint is not None:
+        if maxprint is not None:
             printable = all_printable[-maxprint:]
         else:
             printable = all_printable
