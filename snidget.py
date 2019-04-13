@@ -111,8 +111,7 @@ def parse_args(argv):
 
         elif opt == "-i":
             # Print a new record UID
-            # newUID() has a 'self' arg so can't just call Transaction.newUID() --- change that?
-            print transaction.Transaction(database, settings).uid
+            print transaction.new_uid()
 
         elif opt == "-f":
             if arg == "latex":

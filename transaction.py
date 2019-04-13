@@ -4,6 +4,29 @@ from datetime import date
 from time import time
 import readline
 
+
+def new_uid():
+    """ Generate a UID based on the current timestamp """
+    # Backwards timestamp to convert to base 62
+    decimal = int(str(int(time()))[::-1])
+    obase = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+    uid = ""
+    p = 1
+    #For some reason this doesn't work for while decimal>=0
+    while decimal != 0:
+        tmp = decimal % 62**p
+        digit = obase[tmp/(62**(p-1))]
+        uid = "%s%s" % (digit, uid)
+        decimal -= tmp
+        p += 1
+
+    # Pad with zeros on the left to make exactly six digits long
+    while len(uid) < 6:
+        uid = "0%s" % uid
+
+    return uid
+
+
 class Transaction(object):
     """ Transaction class, containing info on individual transactions"""
 
@@ -19,7 +42,7 @@ class Transaction(object):
             self.deltas = {}
             self.resulting_balance = {}
             self.id = ""
-            self.uid = self.new_uid()
+            self.uid = new_uid()
             self.visible = True
 
         else:
@@ -176,32 +199,6 @@ class Transaction(object):
         """ Set the resulting balance of the account after this transaction """
         self.resulting_balance[account] = balance
         return
-
-
-    def new_uid(self):
-        """ Generate a UID based on the current timestamp """
-        # Note this is one direction only
-
-        # Backwards timestamp to convert to base 62
-        decimal = int(str(int(time()))[::-1])
-
-        #ibase = "0123456789"
-        obase = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-        uid = ""
-        p = 1
-        #For some reason this doesn't work for while decimal>=0
-        while decimal != 0:
-            tmp = decimal % 62**p
-            digit = obase[tmp/(62**(p-1))]
-            uid = "%s%s" % (digit, uid)
-            decimal -= tmp
-            p += 1
-
-        # Pad with zeros on the left to make exactly six digits long
-        while len(uid) < 6:
-            uid = "0%s" % uid
-
-        return uid
 
 
     #! Can these all completers be consolidated into one function?

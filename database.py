@@ -8,6 +8,17 @@ import transaction
 # It is basically a container object for all the transactions on record,
 # including the functions for determining which records to show when printed
 
+def sort_balances(balances):
+    """ Helper func to sort dictionaries of balances by value """
+    items = [(value, key) for key, value in balances.items()]
+    items.sort()
+    items.reverse() # so largest is first
+    # Our dictionary has become a list of tuples to maintain order
+    #return [(k, v) for v, k in items]
+    # The GUI requires the value be a string.
+    return [(key, "%.2f" % value) for value, key in items]
+
+
 class Database(object):
     """ Database class, which holds and organizes transactions."""
     def __init__(self, settings):
@@ -315,7 +326,7 @@ class Database(object):
                 else:
                     balances[record.type] += record.value()
 
-        balances = self.sort_balances(balances)
+        balances = sort_balances(balances)
         return balances # this is a list of tuples
 
     #! For ByType and ByRecipient, include a field with the number of
@@ -334,19 +345,8 @@ class Database(object):
                 else:
                     balances[record.dest] += record.value()
 
-        balances = self.sort_balances(balances)
+        balances = sort_balances(balances)
         return balances # this is a list of tuples
-
-
-    def sort_balances(self, balances):
-        """ Helper func to sort dictionaries of balances by value """
-        items = [(value, key) for key, value in balances.items()]
-        items.sort()
-        items.reverse() # so largest is first
-        # Our dictionary has become a list of tuples to maintain order
-        #return [(k, v) for v, k in items]
-        # The GUI requires the value be a string.
-        return [(key, "%.2f" % value) for value, key in items]
 
 
     def integrate_deltas(self, visible_only=True):

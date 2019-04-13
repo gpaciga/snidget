@@ -19,6 +19,21 @@ import sys
 import os
 import pickle
 
+def get_open_exchange_rates():
+    """ Use open exchange rate API to get exchange rates """
+    app_id = '07da2e05cce04ac48280eb00ce9e3eca' # should be a setting?
+    api_url = 'https://openexchangerates.org/api/latest.json?app_id=' + app_id
+    response = urllib2.urlopen(api_url)
+    data = json.load(response)
+    return data
+
+
+def protected_types():
+    """ Return types which can not be removed """
+    protected = ["Income", "Transfer", "Adjustment"]
+    return protected
+
+
 class Settings(object):
     """ Manage and store user settings """
 
@@ -523,12 +538,6 @@ class Settings(object):
         return self.options['postypes']
 
 
-    def protected_types(self):
-        """ Return types which can not be removed """
-        protected = ["Income", "Transfer", "Adjustment"]
-        return protected
-
-
     def expense_types(self):
         """ Return types which are considered expenses """
         return self.options['extypes']
@@ -613,24 +622,15 @@ class Settings(object):
         currency_to = self.options['defaultCurrency']
         # if being called multiple times, should provide data so as to not call the API every time
         if data is False:
-            data = self.get_open_exchange_rates()
+            data = get_open_exchange_rates()
         default_rate = data['rates'][currency_to]
         destination_rate = data['rates'][currency_from]
         return float(default_rate/destination_rate)
 
 
-    def get_open_exchange_rates(self):
-        """ Use open exchange rate API to get exchange rates """
-        app_id = '07da2e05cce04ac48280eb00ce9e3eca' # should be a setting?
-        api_url = 'https://openexchangerates.org/api/latest.json?app_id=' + app_id
-        response = urllib2.urlopen(api_url)
-        data = json.load(response)
-        return data
-
-
     def update_exchanges(self):
         """ Update all the exchange rates using Google """
-        rates = self.get_open_exchange_rates()
+        rates = get_open_exchange_rates()
         for currency in self.options['exchangeRates'].iterkeys():
             rate = self.get_exchange_rate(currency, data=rates)
             if rate is not False:
@@ -709,7 +709,7 @@ class Settings(object):
     def del_type(self, expense_type):
         """ Delete a type """
         if expense_type in self.types():
-            if expense_type in self.protected_types():
+            if expense_type in protected_types():
                 print "Cannot remove protected type"
                 return False
 
