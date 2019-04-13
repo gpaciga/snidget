@@ -141,8 +141,7 @@ class Transaction(object):
             return cmp(self.value(), other.value())
         elif self.id != other.id:
             return cmp(self.id, other.id)
-        else:
-            return cmp(self.uid, other.uid)
+        return cmp(self.uid, other.uid)
 
 
     def encode(self):
@@ -205,6 +204,8 @@ class Transaction(object):
         return uid
 
 
+    #! Can these all completers be consolidated into one function?
+    # Only the list of possibilities changes.
     def complete(self, text, state):
         """ Return possible words in database on tab """
         for cmd in self.database.words():
@@ -213,10 +214,9 @@ class Transaction(object):
                     return cmd
                 else:
                     state -= 1
-        # No idea what the "state" business is about
+        return None
 
-    #! Can these all be consolidated into one function?
-    # Only the list of possibilities changes.
+
     def complete_dest(self, text, state):
         """ Return possible words in database on tab """
         for cmd in self.database.places():
@@ -225,7 +225,8 @@ class Transaction(object):
                     return cmd
                 else:
                     state -= 1
-        # No idea what the "state" business is about
+        return None
+
 
     def complete_desc(self, text, state):
         """ Return possible words in database on tab """
@@ -235,7 +236,8 @@ class Transaction(object):
                     return cmd
                 else:
                     state -= 1
-        # No idea what the "state" business is about
+        return None
+
 
     def complete_type(self, text, state):
         """ Return possible types on tab """
@@ -246,7 +248,7 @@ class Transaction(object):
                     return cmd
                 else:
                     state -= 1
-        # No idea what the "state" business is about
+        return None
 
 
     def input_values(self):
@@ -312,8 +314,8 @@ class Transaction(object):
         # Try to complete type on tab
         readline.set_completer(self.complete_type)
 
-        for i in range(0, len(types)):
-            optlist = "[%d] %s " % (i, types[i])
+        for index, expense_type in enumerate(types):
+            optlist = "[%d] %s " % (index, expense_type)
             print optlist,
         print
         prompt = "Type (%s): " % self.type
@@ -330,7 +332,7 @@ class Transaction(object):
                     #! Should abort or retry or something
 
         # Go to special transfer function if deltas not already defined
-        if self.type == "Transfer" and len(self.deltas) == 0:
+        if self.type == "Transfer" and not self.deltas:
             self.input_transfer()
             # and deltas is empty...
             return
@@ -344,8 +346,8 @@ class Transaction(object):
         # Try to complete destination on tab
         readline.set_completer(self.complete_dest)
 
-        for i in range(0, len(places)):
-            optlist = "[%d] %s " % (i, places[i])
+        for index, place in enumerate(places):
+            optlist = "[%d] %s " % (index, place)
             print optlist,
         print
         prompt = "Places (%s): " % self.dest
@@ -361,8 +363,8 @@ class Transaction(object):
         #! Can most recent be default? If so, what if I want a null description?
         predictions = self.database.predict_description(
             self.dest, self.type, self.settings.number_to_predict())
-        for i in range(0, len(predictions)):
-            optlist = "[%d] %s " % (i, predictions[i])
+        for index, prediction in enumerate(predictions):
+            optlist = "[%d] %s " % (index, prediction)
             print optlist,
         print
 
@@ -420,8 +422,8 @@ class Transaction(object):
         for key in allkeys:
             if self.database.is_printable(key):
                 keys.append(key)
-        for i in range(0, len(keys)):
-            optlist = "[%d] %s " % (i, self.settings.account_name(keys[i]))
+        for index, key in enumerate(keys):
+            optlist = "[%d] %s " % (index, self.settings.account_name(key))
             print optlist,
         print
         prompt = "From: "

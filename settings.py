@@ -223,10 +223,10 @@ class Settings(object):
         # Check the format of the argument
         if args[0] == 'print':
             print self
-            return
+            return changed_options
         elif args[0] == 'save':
             self.save_filters()
-            return
+            return changed_options
         elif args[0] == 'help':
             print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
             print "Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings."
@@ -248,11 +248,11 @@ class Settings(object):
             print "  save                    Save current filters as the defaults and commit any other changes to settings."
             print "  print                   Special command to print the current options in an ugly way."
             print "  help                    Print this help."
-            return
+            return changed_options
         elif len(args) != 2:
             print "Options must be changed using command=argument format."
             print "Use '-o help' for recognized options."
-            return
+            return changed_options
 
         command = args[0]
         arg = args[1]
@@ -515,8 +515,7 @@ class Settings(object):
         """ Return the types dictionary """
         if ind is None:
             return self.options['types']
-        else:
-            return self.options['types'][ind]
+        return self.options['types'][ind]
 
 
     def positive_types(self):
@@ -550,8 +549,7 @@ class Settings(object):
         """ Return the list of places """
         if ind is None:
             return self.options['places']
-        else:
-            return self.options['places'][ind]
+        return self.options['places'][ind]
 
 
     def filters(self):
@@ -596,10 +594,7 @@ class Settings(object):
 
     def is_foreign(self, acc):
         """ Return where an account is foreign """
-        if acc in self.options['foreignCurrencies'].keys():
-            return True
-        else:
-            return False
+        return bool(acc in self.options['foreignCurrencies'].keys())
 
 
     def exchange(self, acc):
@@ -607,8 +602,7 @@ class Settings(object):
         if self.is_foreign(acc):
             currency = self.options['foreignCurrencies'][acc]
             return self.options['exchangeRates'][currency]
-        else:
-            return 1.00
+        return 1.00
 
 
     def get_exchange_rate(self, currency, data=False):
@@ -692,9 +686,8 @@ class Settings(object):
         """ Add a place to the saved suggestions """
         if name in self.places():
             return False
-        else:
-            self.options['places'].append(name)
-            return True
+        self.options['places'].append(name)
+        return True
 
 
     def del_place(self, name):
@@ -702,8 +695,7 @@ class Settings(object):
         if name in self.places():
             self.options['places'].remove(name)
             return True
-        else:
-            return False
+        return False
 
 
     def add_type(self, expense_type):
@@ -711,21 +703,20 @@ class Settings(object):
         if expense_type in self.types():
             self.options['types'].append(expense_type)
             return True
-        else:
-            return False
+        return False
 
 
     def del_type(self, expense_type):
         """ Delete a type """
         if expense_type in self.types():
-            if expense_type not in self.protected_types():
-                self.options['types'].remove(expense_type)
-                return True
-            else:
+            if expense_type in self.protected_types():
                 print "Cannot remove protected type"
                 return False
-        else:
-            return False
+
+            self.options['types'].remove(expense_type)
+            return True
+
+        return False
 
 
     def add_account(self, name):
@@ -733,13 +724,13 @@ class Settings(object):
         if name not in self.account_names():
             self.options['accounts'][self.new_account_key()] = name
             return True
-        else:
-            if name in self.deleted_account_names():
-                self.undel_account(name)
-                return True
-            else:
-                print "That account name already exists"
-                return False
+
+        if name in self.deleted_account_names():
+            self.undel_account(name)
+            return True
+
+        print "That account name already exists"
+        return False
 
 
     def add_foreign(self, args):
@@ -784,9 +775,9 @@ class Settings(object):
             self.options['exchangeRates'][currency] = rate
             print "Set exchange rate of %s to %f" % (currency, rate)
             return True
-        else:
-            print "There are no accounts with currency %s" % currency
-            return False
+
+        print "There are no accounts with currency %s" % currency
+        return False
 
 
     def undel_account(self, name):
@@ -795,8 +786,7 @@ class Settings(object):
         if key in self.deleted_account_keys():
             self.options['deletedAccounts'].remove(key)
             return True
-        else:
-            return False
+        return False
 
 
     def del_account(self, name):
@@ -818,8 +808,7 @@ class Settings(object):
             key = self.account_key(oldname)
             self.options['accounts'][key] = newname
             return True
-        else:
-            return False
+        return False
 
 
     def save_filters(self):

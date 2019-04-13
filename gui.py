@@ -53,8 +53,7 @@ class SnidgetGUI(object):
             return True
         elif response == gtk.RESPONSE_NO:
             return True
-        else:
-            return False
+        return False
 
 
     def dialog_edit(self, record=None):
@@ -99,10 +98,10 @@ class SnidgetGUI(object):
         frame_type = gtk.Frame("Type")
         type_menu = gtk.combo_box_new_text()
         types = snidget.settings.types()
-        for ind in range(0, len(types)):
-            type_menu.append_text(types[ind])
-            if record.type == types[ind]:
-                type_menu.set_active(ind)
+        for index, expense_type in enumerate(types):
+            type_menu.append_text(expense_types)
+            if record.type == expense_types:
+                type_menu.set_active(index)
         frame_type.add(type_menu)
         hbox_top.pack_start(frame_type, False, False, 5)
 
@@ -327,15 +326,15 @@ class SnidgetGUI(object):
 
             # Write the selected types into a comma separated list
             new_types = ''
-            for ind in range(0, len(type_checks)):
-                if type_checks[ind].get_active() is True:
-                    new_types += snidget.settings.types()[ind]+','
+            for index, type_check in enumerate(type_checks):
+                if type_check.get_active() is True:
+                    new_types += snidget.settings.types()[index] + ','
 
             # Cut off the last comma
             new_types = new_types[0:-1]
 
             # Set the new filter
-            if len(new_types) == 0:
+            if not new_types:
                 snidget.database.filters['types'] = None
             else:
                 snidget.database.filters['types'] = new_types
@@ -386,15 +385,15 @@ class SnidgetGUI(object):
 
             # Write the selected types into a comma separated list
             new_accounts = ''
-            for ind in range(0, len(account_checks)):
-                if account_checks[ind].get_active() is True:
-                    new_accounts += snidget.settings.account_names()[ind] + ','
+            for index, account_check in enumerate(account_checks):
+                if account_check.get_active() is True:
+                    new_accounts += snidget.settings.account_names()[index] + ','
 
             # Cut off the last comma
             new_accounts = new_accounts[0:-1]
 
             # Set the new filter
-            if len(new_accounts) == 0:
+            if not new_accounts:
                 snidget.database.filters['accounts'] = None
             else:
                 snidget.database.filters['accounts'] = new_accounts
@@ -505,8 +504,8 @@ class SnidgetGUI(object):
         if response == gtk.RESPONSE_OK:
             text = entry.get_text()
             return text
-        else:
-            return None
+        return None
+
 
     def dialog_uid(self):
         """ Dialog for UID filter """
@@ -845,7 +844,6 @@ class SnidgetGUI(object):
         # Go ahead and quit unless something happened
         if ok is True:
             gtk.main_quit()
-            return False
 
 
     def set_status(self, string=""):
@@ -1063,9 +1061,9 @@ class SnidgetGUI(object):
         #! Need to make columns flexible for different view modes
         column_names = snidget.database.headings()
         self.tvcolumn = [None] * len(column_names)
-        for index in range(0, len(column_names)):
+        for index, column_name in enumerate(column_names):
             cell = gtk.CellRendererText()
-            self.tvcolumn[n] = gtk.TreeViewColumn(column_names[index], cell)
+            self.tvcolumn[n] = gtk.TreeViewColumn(column_name, cell)
             if index > 3:
                 cell.set_property('xalign', 1.0)
             self.tvcolumn[index].set_cell_data_func(cell, self.cell_value, index)

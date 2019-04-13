@@ -266,7 +266,7 @@ def start_gui():
 # If no args, start the gui
 # Else, parse the args
 if __name__ == "__main__":
-    if len(sys.argv[1:]) == 0:
+    if not sys.argv[1:]:
         import gui
         start_gui()
     else:

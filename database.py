@@ -716,21 +716,16 @@ class Database(object):
                 and self.filters['columns'] not in ["None", "none", "All", "all"]):
             allowed = self.filters['columns'].split(',')
             if name in self.settings.account_names():
-                if name in allowed:
-                    return True
-                else:
-                    return False
+                return bool(name in allowed)
             elif name in self.settings.account_keys():
                 # First convert the names allowed to their keys
                 allowed_keys = []
                 for account in allowed:
                     allowed_keys.append(self.settings.account_key(account))
-                if name in allowed_keys:
-                    return True
-                else:
-                    return False
+                return bool(name in allowed_keys)
             else:
                 print "Error: account %s not recognized in is_printable" % name
+                return False
         elif self.filters['columns'] in ["None", "none"]:
             return False
         else:
