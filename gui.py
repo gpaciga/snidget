@@ -307,9 +307,9 @@ class SnidgetGUI(object):
 
         # Add all the types to the dialog, checked or not
         type_checks = []
-        for type in snidget.settings.types():
-            this_check = gtk.CheckButton(label=type)
-            if type in current_types:
+        for expense_type in snidget.settings.types():
+            this_check = gtk.CheckButton(label=expense_type)
+            if expense_type in current_types:
                 this_check.set_active(True)
             type_checks.append(this_check)
             dialog.vbox.pack_start(this_check, False, False, 0)

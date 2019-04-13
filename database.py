@@ -166,9 +166,9 @@ class Database(object):
                 #output += "%9.2f " % sum(balances['all'].values())
                 output += "%9.2f " % balances['all']['sum']
             else:
-                for key, total_value in balances['all'].iteritems():
+                for key, value in balances['all'].iteritems():
                     if key != 'sum' and self.is_printable(key):
-                        output += "%9.2f " % total_value
+                        output += "%9.2f " % value
             output += "\n"
 
             #vistotal = sum(balances['visible'].values())
@@ -460,11 +460,11 @@ class Database(object):
         return values
     #! The above stops on the last record, not the last day in the range
 
-    def predict_destination(self, type, num=1):
+    def predict_destination(self, expense_type, num=1):
         """ Get the n last destinations of a given type """
         predictions = []
         for record in reversed(self.records):
-            if record.type == type:
+            if record.type == expense_type:
                 if record.dest not in predictions:
                     if len(predictions) == num - 1:
                         # This will be the last prediction asked for
@@ -475,13 +475,13 @@ class Database(object):
         # In case we didn't find n unique dests
         return predictions
 
-    def predict_description(self, dest, type=None, num=1):
+    def predict_description(self, dest, expense_type=None, num=1):
         """ Get the n last descriptions of a given dest """
         predictions = []
         for record in reversed(self.records):
             if record.dest == dest:
                 # Optionally limit ourselves to a specific type
-                if record.type == type or type is None:
+                if record.type == expense_type or expense_type is None:
                     if record.desc not in predictions:
                         if len(predictions) == num - 1:
                             predictions.append(record.desc)
@@ -534,13 +534,13 @@ class Database(object):
 
 
     # Filter behaviour may be inconsistent...
-    def filter_type(self, type, flag=True):
+    def filter_type(self, expense_type, flag=True):
         """ Filter records that match type """
         # Check if the first character is a negation
-        if str.find(type, self.settings.not_character()) == 0:
+        if str.find(expense_type, self.settings.not_character()) == 0:
             flag = not flag
-            type = type[1:]
-        types = str.split(type, ',')
+            expense_type = expense_type[1:]
+        types = str.split(expense_type, ',')
         for record in self.records:
             if record.visible and (record.type in types):
                 record.visible = flag
@@ -564,11 +564,11 @@ class Database(object):
             elif record.visible:
                 record.visible = not flag
 
-    def filter_string(self, filter, flag=True):
+    def filter_string(self, needle, flag=True):
         """ Filter according to whether record description contains a string """
         for record in self.records:
             if record.visible:
-                if record.desc.find(filter) >= 0 or record.dest.find(filter) >= 0:
+                if record.desc.find(needle) >= 0 or record.dest.find(needle) >= 0:
                     record.visible = flag
                 else:
                     record.visible = not flag
@@ -590,10 +590,10 @@ class Database(object):
                 if valmax != None and record.value() > valmax:
                     record.visible = not flag
 
-    def filter_account(self, account, flag=True):
+    def filter_account(self, account_string, flag=True):
         """ Filter by requiring account delta is non-zero """
 
-        accounts = str.split(account, ',')
+        accounts = str.split(account_string, ',')
         for account in accounts:
             # Get index of account we want. Will be same index as delta array.
             if account in self.settings.account_names():

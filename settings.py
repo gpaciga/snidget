@@ -698,20 +698,20 @@ class Settings(object):
             return False
 
 
-    def add_type(self, type):
+    def add_type(self, expense_type):
         """ Add a type """
-        if type in self.types():
-            self.options['types'].append(type)
+        if expense_type in self.types():
+            self.options['types'].append(expense_type)
             return True
         else:
             return False
 
 
-    def del_type(self, type):
+    def del_type(self, expense_type):
         """ Delete a type """
-        if type in self.types():
-            if type not in self.protected_types():
-                self.options['types'].remove(type)
+        if expense_type in self.types():
+            if expense_type not in self.protected_types():
+                self.options['types'].remove(expense_type)
                 return True
             else:
                 print "Cannot remove protected type"
