@@ -11,7 +11,6 @@ import snidget
 
 def output(database):
     """ Print database as latex table """
-#    snidget.database.reset_filters()
 
     print "\\documentclass{article}"
     print "\\begin{document}"
@@ -28,40 +27,29 @@ def output(database):
             num_weeks = int(snidget.database.filters['dates'][1:])
             start = snidget.settings.TODAY - snidget.settings.ONEWEEK*num_weeks
             end = snidget.settings.TODAY
-            #print "\\date{%s to %s}" % (snidget.TODAY, snidget.TODAY-snidget.ONEWEEK*n)
 
         else:
             args = str.split(database.filters['dates'], ",")
             start = args[0]
             end = args[1]
-            #print "\\date{%s to %s}" % (args[0], args[1])
 
     else:
         start = snidget.database.records[0].date
         end = snidget.settings.TODAY
-        #print "\\date{%s to %s}" % (database.records[0].date, snidget.TODAY)
 
     print "\\date{%s to %s}" % (start, end)
     print "\\maketitle"
 
     # Print summary of types
-
-    #print "\\begin{table}"
-    #print "  \\begin{center}"
-    #print "  \\caption{Total in each type category}"
-    #print "  \\begin{tabular}{lr@{.}l}"
     print "\\section{Total in each Type}"
     print "  \\begin{tabular}{lr}"
     print "    \\hline"
-    #print "    \\textbf{Type} & \\multicolumn{2}{c}{\\textbf{Total}} \\\\"
     print "    \\textbf{Type} & \\textbf{Total} \\\\"
     print "    \\hline"
     for expense_type in snidget.database.balances_by_type():
         print "       %-14s & %10s \\\\" % expense_type
     print "    \\hline"
     print "  \\end{tabular}"
-    #print "  \\end{center}"
-    #print "\\end{table}"
 
     for expense_type in snidget.settings.types():
         print "\\section{%s}" % expense_type
@@ -79,5 +67,3 @@ def output(database):
         print "  \\end{tabular}"
 
     print "\\end{document}"
-
-#end def output

@@ -83,9 +83,6 @@ class Database(object):
                 w_desc = len(record.desc)
             if record.id != "":
                 print_id = True
-        #w_type+=2
-        #w_dest+=2
-        #w_desc+=2
 
         # Write out the header stuff for the table
         # Make a format string with the right size arguments to the %s values
@@ -104,7 +101,8 @@ class Database(object):
             divider += "-------   "
         else:
             for account in self.settings.accounts().itervalues():
-                if account not in self.settings.deleted_account_names() and self.is_printable(account):
+                if (account not in self.settings.deleted_account_names()
+                        and self.is_printable(account)):
                     if csv:
                         output += ",%s" % (account)
                     else:
@@ -129,7 +127,8 @@ class Database(object):
         else:
             output += "   UID\n"
         divider += "------\n"
-        if not csv: output += divider
+        if not csv:
+            output += divider
 
         # Add the records to the database
         n_rows = 1
@@ -141,7 +140,8 @@ class Database(object):
             if not csv and n_rows % 5 == 0:
                 output += "\n"
             n_rows += 1
-        if not csv: output += divider
+        if not csv:
+            output += divider
 
         # print summary information only when not csv
         if not csv:
@@ -152,7 +152,6 @@ class Database(object):
             # Print a line of account totals of visible records
             output += "%s Total visible:  " % (" "*balance_spacing)
             if total_value:
-                #output += "%9.2f " % sum(balances['visible'].values())
                 output += "%9.2f " % balances['visible']['sum']
             else:
                 for key, value in balances['visible'].iteritems():
@@ -163,7 +162,6 @@ class Database(object):
             # Print a line of account totals over all records
             output += "%s Total balance:  " % (" "*balance_spacing)
             if total_value:
-                #output += "%9.2f " % sum(balances['all'].values())
                 output += "%9.2f " % balances['all']['sum']
             else:
                 for key, value in balances['all'].iteritems():
@@ -171,9 +169,6 @@ class Database(object):
                         output += "%9.2f " % value
             output += "\n"
 
-            #vistotal = sum(balances['visible'].values())
-            #total = sum(balances['all'].values())
-            #weekly = sum(balances['thisweek'].values())
             vistotal = balances['visible']['sum']
             total = balances['all']['sum']
             weekly = balances['thisweek']['sum']
@@ -383,10 +378,9 @@ class Database(object):
                 else:
                     while this_date != current_date:
                         this_value = [current_date]
-                        this_value.extend(balances.values()) # was balances[:]
+                        this_value.extend(balances.values())
                         this_value.append(total)
                         values.append(this_value)
-                        #values.append((current_date, balances[:], total))
                         current_date = current_date+timedelta(1)
                     for acc, delta in record.deltas.iteritems():
                         balances[acc] += delta
@@ -396,7 +390,6 @@ class Database(object):
         this_value.extend(balances.values())
         this_value.append(total)
         values.append(this_value)
-        #values.append((current_date, balances[:], total))
         return values
 
 
@@ -459,6 +452,7 @@ class Database(object):
 
         return values
     #! The above stops on the last record, not the last day in the range
+
 
     def predict_destination(self, expense_type, num=1):
         """ Get the n last destinations of a given type """
@@ -529,7 +523,6 @@ class Database(object):
 
     def set_filter_defaults(self):
         """ Set filters back to their defaults """
-        #database.filters = self.settings.filters()
         self.filters = self.settings.filters()
 
 
@@ -576,7 +569,8 @@ class Database(object):
     def filter_week(self, num_weeks=1):
         """ Filter out records older than n weeks (default n=1) from today"""
         for record in self.records:
-            if record.date <= self.settings.TODAY - self.settings.ONEWEEK*num_weeks or record.date > self.settings.TODAY:
+            if (record.date <= self.settings.TODAY - self.settings.ONEWEEK*num_weeks
+                    or record.date > self.settings.TODAY):
                 record.visible = False
 
     def filter_value(self, valmin=None, valmax=None, flag=True):
@@ -598,7 +592,8 @@ class Database(object):
             # Get index of account we want. Will be same index as delta array.
             if account in self.settings.account_names():
                 # Given the name we must find the key
-                key = 'KERROR' # this should never survive loop below since we already know the name exists
+                 # KERROR should never survive loop below since we already know the name exists
+                key = 'KERROR'
                 for acc, name in self.settings.accounts().iteritems():
                     if name == account:
                         key = acc
@@ -658,7 +653,8 @@ class Database(object):
                 # Look for second date, and use it to set filter if it's there
                 try:
                     maxdate = str.split(args[1], "-")
-                    maxdate = date(int(maxdate[0]), int(maxdate[1]), int(maxdate[2])) # Transaction date
+                     # Transaction date
+                    maxdate = date(int(maxdate[0]), int(maxdate[1]), int(maxdate[2]))
                     self.filter_date(mindate, maxdate)
                 except:
                     self.filter_date(mindate)
@@ -668,7 +664,6 @@ class Database(object):
             # We print only the account in the string
             self.filter_account(self.filters['accounts'])
 
-
         # Apply the filter by type
         if self.filters['types'] != None:
             self.filter_type(self.filters['types'])
@@ -676,7 +671,6 @@ class Database(object):
         # Apply the filter by recipient
         if self.filters['recipients'] != None:
             self.filter_recipient(self.filters['recipients'])
-
 
         # Apply the desc/dest string filter
         if self.filters['string'] != None:
@@ -686,7 +680,6 @@ class Database(object):
                 self.filter_string(self.filters['string'][1:], flag=False)
             else:
                 self.filter_string(self.filters['string'])
-
 
         if self.filters['values'] != None:
             values = str.split(self.filters['values'], ',')
@@ -710,30 +703,38 @@ class Database(object):
 
             self.filter_value(values[0], values[1])
 
-
         # Remove the UIDs listed
         if self.filters['uid'] != None:
             uids = str.split(self.filters['uid'], ',')
             for uid in uids:
                 self.filter_uid(uid, False)
 
+
     def is_printable(self, name):
         """ Return a boolean saying whether the account is allowed by the columns filter """
-        if self.filters['columns'] is not None and self.filters['columns'] not in ["None", "none", "All", "all"]:
+        if (self.filters['columns'] is not None
+                and self.filters['columns'] not in ["None", "none", "All", "all"]):
             allowed = self.filters['columns'].split(',')
             if name in self.settings.account_names():
-                if name in allowed: return True
-                else: return False
+                if name in allowed:
+                    return True
+                else:
+                    return False
             elif name in self.settings.account_keys():
                 # First convert the names allowed to their keys
                 allowed_keys = []
-                for account in allowed: allowed_keys.append(self.settings.account_key(account))
-                if name in allowed_keys: return True
-                else: return False
+                for account in allowed:
+                    allowed_keys.append(self.settings.account_key(account))
+                if name in allowed_keys:
+                    return True
+                else:
+                    return False
             else:
                 print "Error: account %s not recognized in is_printable" % name
-        elif self.filters['columns'] in ["None", "none"]: return False
-        else: return True # no columns = all columns
+        elif self.filters['columns'] in ["None", "none"]:
+            return False
+        else:
+            return True # no columns = all columns
 
     # EXTRA STUFF FOR POSSIBLE GUI
     def headings(self):
@@ -745,5 +746,3 @@ class Database(object):
         output.append('ID')
         output.append('UID')
         return tuple(output)
-
-# END Database class

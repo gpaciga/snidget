@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 """ Simply track expenses, income, account balances, etc."""
 
-# To do: Abstract the expense types from the income types
-#        More error checking and argument type checking
-#        Warn if removing account with non-zero balance
-#        When a new Type or Account code is encountered, ask for a name and save it in the options
-#        Maybe have some prediction thing, so if the first few fields are similar it'll suggest a complete record? (e.g. for monthly things)
+# To do:
+# - Abstract the expense types from the income types
+# - More error checking and argument type checking
+# - Warn if removing account with non-zero balance
+# - When a new Type or Account code is encountered, ask for a name and save it in the options
+# - Maybe have some prediction thing, so if the first few fields are similar it'll suggest a
+#   complete record? (e.g. for monthly things)
 
-#! If you change the database to a file which does not exist, that error on loading the database will not let us get as far as the -o command to fix it!
+#! If you change the database to a file which does not exist,
+#! that error on loading the database will not let us get as far as the -o command to fix it!
 
 import sys # to get command line options
 import getopt # to parse command line options
@@ -31,11 +34,9 @@ def usage():
     for line in usage_file:
         output += line
     return output
-# end def usage
 
-# Unused option letters:
-#  jklmyz GHIJKMOPQYZ
 
+# Unused option letters: jklmyz GHIJKMOPQYZ
 def parse_args(argv):
     """ Process command line arguments. """
     try:
@@ -56,10 +57,13 @@ def parse_args(argv):
             for acc in settings.accounts().iterkeys():
                 if acc not in settings.deleted_account_keys():
                     if acc in settings.foreign_account_keys():
-                        print "%-15s %12.2f = %12.2f" % (settings.account_name(acc), balances[acc], balances[acc]*settings.exchange(acc))
+                        print "%-15s %12.2f = %12.2f" % \
+                            (settings.account_name(acc), balances[acc],
+                             balances[acc]*settings.exchange(acc))
                         total += balances[acc]*settings.exchange(acc)
                     else:
-                        print "%-15s %12.2s   %12.2f" % (settings.account_name(acc), "", balances[acc])
+                        print "%-15s %12.2s   %12.2f" % \
+                            (settings.account_name(acc), "", balances[acc])
                         total += balances[acc]
             print "%-15s %12.2s   ============" % ("", "")
             print "%-15s %12.2s   %12.2f" % ("Total", "", total)
@@ -68,7 +72,8 @@ def parse_args(argv):
             for datapoint in database.integrate_deltas():
                 output = ""
                 output += "%s " % datapoint[0]
-                for i in range(0, len(settings.accounts())+1): # +1 because we have a column for the total
+                # +1 because we have a column for the total
+                for i in range(0, len(settings.accounts()) + 1):
                     output += "%9.2f " % datapoint[1+i]
                 print output
 
@@ -161,12 +166,12 @@ def parse_args(argv):
             print "  %35s %9.2f" % (" ", typesum)
 
         elif opt == "-u":
-            print "Updating all exchange rates from Google (but you must save explicitly with -o save!)"
+            print "Updating all exchange rates (but you must save explicitly with -o save!)"
             settings.update_exchanges()
 
         elif opt == "-v":
             # Like -p but print values, not individual accounts
-            print database.__str__(total_value = not settings.total_values())
+            print database.__str__(total_value=not settings.total_values())
 
         elif opt == "-w":
             # Integrate over n days, defaults to 7.
@@ -251,11 +256,12 @@ def parse_args(argv):
         #If we ever get around to using long options:
         #elif opt in ("-t", "--test"):
         #and you have to do something else for --test=value type args
-# end def parse_args
+
 
 def start_gui():
     snidget_gui = gui.SnidgetGUI()
     snidget_gui.main()
+
 
 # If no args, start the gui
 # Else, parse the args

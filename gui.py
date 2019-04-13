@@ -464,8 +464,10 @@ class SnidgetGUI(object):
             date_end = cal_end.get_date()
 
             # Again, remember months start at 0
-            filter_string = "%04d-%02d-%02d,%04d-%02d-%02d" % (date_start[0], date_start[1]+1, date_start[2],
-                                                               date_end[0], date_end[1]+1, date_end[2])
+            filter_string = "%04d-%02d-%02d,%04d-%02d-%02d" % (
+                date_start[0], date_start[1]+1, date_start[2],
+                date_end[0], date_end[1]+1, date_end[2]
+            )
 
             snidget.database.filters['dates'] = filter_string
             self.set_status("Set date range to %s." % filter_string)
@@ -904,11 +906,11 @@ class SnidgetGUI(object):
         </menubar>
         </ui>'''
 
-# to be added to menu UI when view mode functionality works
-#            <separator name="sep1"/>
-#            <menuitem action="By Transaction"/>
-#            <menuitem action="By Recipient"/>
-#            <menuitem action="By Category"/>
+        # to be added to menu UI when view mode functionality works
+        #            <separator name="sep1"/>
+        #            <menuitem action="By Transaction"/>
+        #            <menuitem action="By Recipient"/>
+        #            <menuitem action="By Category"/>
 
         uimanager = gtk.UIManager()
 
@@ -927,9 +929,12 @@ class SnidgetGUI(object):
             ('View', None, '_View'),
             ('Back', None, '_Back', "<control>b", "Go back", self.menu_back),
             ('Forward', None, '_Forward', "<control>f", "Go forward", self.menu_forward),
-            ('By Recipient', None, '_By Recipient', "<control>r", "View total for each recipient", self.menu_recipients),
-            ('By Transaction', None, '_By Transaction', "<control>t", "View transactions individually", self.menu_transactions),
-            ('By Category', None, '_By Category', "<control>c", "View total for each type of transaction", self.menu_types)
+            ('By Recipient', None, '_By Recipient', "<control>r",
+             "View total for each recipient", self.menu_recipients),
+            ('By Transaction', None, '_By Transaction', "<control>t",
+             "View transactions individually", self.menu_transactions),
+            ('By Category', None, '_By Category', "<control>c",
+             "View total for each type of transaction", self.menu_types)
         ])
 
         # Add actiongroup and ui to uimanager

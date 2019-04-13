@@ -6,6 +6,7 @@ import readline
 
 class Transaction(object):
     """ Transaction class, containing info on individual transactions"""
+
     def __init__(self, database, settings, record_string=""):
         """ Parse a string into a new transaction, or create an empty one """
         self.database = database
@@ -22,23 +23,16 @@ class Transaction(object):
             self.visible = True
 
         else:
-            #Split the string, with trailing whitespace (including \n) removed
+            # Split the string, with trailing whitespace (including \n) removed
             record_list = str.split(record_string.rstrip(), "|")
 
             date_list = str.split(record_list[0], "-")
-            self.date = date(int(date_list[0]), int(date_list[1]), int(date_list[2])) # Transaction date
+             # Transaction date
+            self.date = date(int(date_list[0]), int(date_list[1]), int(date_list[2]))
 
             self.type = record_list[1] # Type
             self.dest = record_list[2] # Destination/Location
             self.desc = record_list[3] # Description
-
-            # If these strings are empty, should make 0
-            #self.deltas=[]
-            #self.newdeltas={}
-            #for i in range(0,NACCOUNTS):
-            #    self.deltas.append(float(record_list[4+i]))
-            #    self.newdeltas["A%d"%i] = float(record_list[4+i])
-            #print self.newdeltas
 
             self.deltas = {}
 
@@ -67,6 +61,7 @@ class Transaction(object):
             self.resulting_balance = {}
             self.visible = True
 
+
     def str_value(self, print_id=True, w_date=10, w_type=9, w_dest=24, w_desc=34):
         """ Write transaction as a string, including only the total value """
         lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds  " % (w_date, w_type, w_dest, w_desc)
@@ -78,7 +73,8 @@ class Transaction(object):
         return output
 
 
-    def __str__(self, total_value=None, print_id=True, w_date=10, w_type=9, w_dest=24, w_desc=34, print_balances=False, csv=False):
+    def __str__(self, total_value=None, print_id=True, w_date=10, w_type=9, w_dest=24, w_desc=34,
+                print_balances=False, csv=False):
         """ Write transaction as a string to be printed """
         # Define the format string using the received inputs for column widths
 
@@ -86,7 +82,8 @@ class Transaction(object):
             total_value = self.settings.total_values()
 
         if csv:
-            lineformat = '%s,%s,"%s","%s"' # quotes around destination and description, which can have commas themselves
+             # quotes around destination and description, which can have commas themselves
+            lineformat = '%s,%s,"%s","%s"'
         else:
             lineformat = "%%-%ds  %%-%ds  %%-%ds  %%-%ds" % (w_date, w_type, w_dest, w_desc)
         output = lineformat % (self.date, self.type, self.dest, self.desc)
@@ -97,7 +94,8 @@ class Transaction(object):
                 output += "%9.2f " % self.value()
         else:
             for acc in self.settings.accounts():
-                if acc not in self.settings.deleted_account_keys() and self.database.is_printable(acc):
+                if (acc not in self.settings.deleted_account_keys()
+                        and self.database.is_printable(acc)):
                     if acc in self.deltas.keys():
                         this_value = self.deltas[acc]
                     else:
@@ -116,13 +114,15 @@ class Transaction(object):
                         if not csv:
                             output += " "
         if print_id:
-            if csv: output += ","
+            if csv:
+                output += ","
             output += "%8s" % self.id
         if csv:
             output += ",%s" % self.uid
         else:
             output += "  %6s" % self.uid
         return output
+
 
     def __cmp__(self, other):
         """ Compare transactions for sorting """
@@ -144,6 +144,7 @@ class Transaction(object):
         else:
             return cmp(self.uid, other.uid)
 
+
     def encode(self):
         """ Write the record in text file format for saving """
         record = "%s|%s|%s|%s|" % (self.date, self.type, self.dest, self.desc)
@@ -155,13 +156,14 @@ class Transaction(object):
         record += "|%s|%s" % (self.id, self.uid)
         return record
 
+
     def edit(self):
         """ Alias for input_values """
         self.input_values()
 
+
     def value(self):
         """ Return total value of transaction """
-        #return sum(self.deltas.values())
         total = 0.0
         for acc, value in self.deltas.iteritems():
             if acc in self.settings.foreign_account_keys():
@@ -170,10 +172,12 @@ class Transaction(object):
                 total += value
         return total
 
+
     def set_running_balance(self, account, balance):
         """ Set the resulting balance of the account after this transaction """
         self.resulting_balance[account] = balance
         return
+
 
     def new_uid(self):
         """ Generate a UID based on the current timestamp """
@@ -200,6 +204,7 @@ class Transaction(object):
 
         return uid
 
+
     def complete(self, text, state):
         """ Return possible words in database on tab """
         for cmd in self.database.words():
@@ -210,10 +215,8 @@ class Transaction(object):
                     state -= 1
         # No idea what the "state" business is about
 
-
     #! Can these all be consolidated into one function?
     # Only the list of possibilities changes.
-
     def complete_dest(self, text, state):
         """ Return possible words in database on tab """
         for cmd in self.database.places():
@@ -244,6 +247,7 @@ class Transaction(object):
                 else:
                     state -= 1
         # No idea what the "state" business is about
+
 
     def input_values(self):
         """ Get transaction details from keyboard input """
@@ -288,23 +292,19 @@ class Transaction(object):
                     print "ERROR: did not understand date"
                     continue
 
-                #self.date = date(int(date_list[0]), int(date_list[1]), int(date_list[2])) # Transaction date
                 try:
                     self.date = date(input_year, input_month, input_day) # Transaction date
                 except:
-                    print "ERROR: could not interpret %d-%d-%d" % (input_year, input_month, input_day)
+                    print "ERROR: could not interpret %s" % date_string
                     continue
 
                 # Warn if entered date is a long time ago. Might be, e.g., a typo in the year.
                 if (self.settings.TODAY - self.date) > self.settings.ONEWEEK:
                     print 'WARNING: Date entered is greater than one week ago!'
                 # Otherwise date stays the same, which will be today if new transaction
-            #endif
 
             # if we got past all the continues above, then the date is OK
             date_ok = True
-
-        #endwhile
 
         # Get transaction type
         types = self.settings.types() # [0]=key, [1]=value
@@ -329,13 +329,11 @@ class Transaction(object):
                     print "WARNING: Type not recognized"
                     #! Should abort or retry or something
 
-
         # Go to special transfer function if deltas not already defined
         if self.type == "Transfer" and len(self.deltas) == 0:
             self.input_transfer()
             # and deltas is empty...
             return
-
 
         # Depending on settings, get fixed list of places or dynamic prediction
         if self.settings.predict_destination():
@@ -359,23 +357,10 @@ class Transaction(object):
             except ValueError:
                 self.dest = answer
 
-        # Get location the old way
-        #for i in range(0,len(self.settings.places())):
-        #    list="[%d] %s " % (i,self.settings.places(i))
-        #    print list,
-        #print
-        #prompt="Places (%s): " % self.dest
-        #answer=raw_input(prompt)
-        #if answer != "":
-        #    try:
-        #        self.dest=self.settings.places(int(answer))
-        #    except:
-        #        self.dest=answer
-
-
         # Use predictive input on the description
         #! Can most recent be default? If so, what if I want a null description?
-        predictions = self.database.predict_description(self.dest, self.type, self.settings.number_to_predict())
+        predictions = self.database.predict_description(
+            self.dest, self.type, self.settings.number_to_predict())
         for i in range(0, len(predictions)):
             optlist = "[%d] %s " % (i, predictions[i])
             print optlist,
@@ -412,7 +397,6 @@ class Transaction(object):
                         self.deltas[acc] = float(answer)
                     else:
                         self.deltas[acc] = float(answer)*-1
-
 
         # Get user specified ID
         prompt = "ID (%s): " % self.id
@@ -452,7 +436,8 @@ class Transaction(object):
             dest = keys[int(answer)]
             self.dest = self.settings.account_name(dest)
 
-        if dest in self.settings.foreign_account_keys() or source in self.settings.foreign_account_keys():
+        if (dest in self.settings.foreign_account_keys()
+                or source in self.settings.foreign_account_keys()):
             print "WARNING: Transfering between different currencies isn't well supported"
             print "         You will have to edit this record with -e to adjust the values"
 
@@ -497,5 +482,3 @@ class Transaction(object):
         output.append(self.id)
         output.append(self.uid)
         return tuple(output)
-
-# END Transaction class

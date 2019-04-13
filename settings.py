@@ -46,7 +46,9 @@ class Settings(object):
         # Change these if you want, though it's not recommended
         # Dollar values in the types Income, Adjustment, and Transfer are ADDED to account balances
         # Dollar values in any other type of transaction are SUBTRACTED from account balances
-        'types'   : ["Income", "Transfer", "Adjustment", "Bill", "Food", "School", "Household", "Extras"],
+        'types'   : [
+            "Income", "Transfer", "Adjustment", "Bill", "Food", "School", "Household", "Extras"
+        ],
         'postypes': ["Income", "Transfer", "Adjustment"],
         'extypes' : ["Food", "School", "Household", "Extras"],
 
@@ -94,6 +96,7 @@ class Settings(object):
             'maxprint': 25,
             }
         }
+
 
     def __init__(self, filename=None):
         """ Load options from an existing file or read in defaults """
@@ -156,7 +159,7 @@ class Settings(object):
             pickle.dump(self.options, options_pickle)
             options_pickle.close()
             print "Pickled default options. You should not get this message again."
-    # end def init
+
 
     def __str__(self):
         """ Convert current options into string for printing """
@@ -193,7 +196,6 @@ class Settings(object):
             output += "%20s: %-40s\n" % (name, value)
 
         return output
-    # end def __str__
 
 
     def save(self, filename=None):
@@ -208,7 +210,7 @@ class Settings(object):
         pickle.dump(self.options, options_pickle)
         options_pickle.close()
         print "Saved options"
-    #end def save
+
 
     def edit(self, command):
         """ Change an option """
@@ -248,7 +250,8 @@ class Settings(object):
             print "  help                    Print this help."
             return
         elif len(args) != 2:
-            print "Options must be changed using command=argument format. Use -o help for recognized options."
+            print "Options must be changed using command=argument format."
+            print "Use '-o help' for recognized options."
             return
 
         command = args[0]
@@ -384,7 +387,6 @@ class Settings(object):
 
         # If anything changed, this will be true
         return changed_options
-    #end def edit
 
 
     def new_account_key(self):
@@ -610,7 +612,9 @@ class Settings(object):
 
 
     def get_exchange_rate(self, currency, data=False):
-        """ Return the conversion to multiply the foreign currency by to get the default currency """
+        """
+        Return the conversion to multiply the foreign currency by to get the default currency
+        """
         currency_from = currency
         currency_to = self.options['defaultCurrency']
         # if being called multiple times, should provide data so as to not call the API every time
@@ -623,8 +627,9 @@ class Settings(object):
 
     def get_open_exchange_rates(self):
         """ Use open exchange rate API to get exchange rates """
-        apiURL = 'https://openexchangerates.org/api/latest.json?app_id=07da2e05cce04ac48280eb00ce9e3eca'
-        response = urllib2.urlopen(apiURL)
+        app_id = '07da2e05cce04ac48280eb00ce9e3eca' # should be a setting?
+        api_url = 'https://openexchangerates.org/api/latest.json?app_id=' + app_id
+        response = urllib2.urlopen(api_url)
         data = json.load(response)
         return data
 
@@ -644,7 +649,8 @@ class Settings(object):
         if self.updated_rates is True:
             self.options['historicalRates'][self.TODAY] = self.options['exchangeRates']
         else:
-            print "Exchange rates have not been updated. Since they are out of date, they will not be saved as today's rates."
+            print "Exchange rates have not been updated."
+            print "Since they are out of date, they will not be saved as today's rates."
 
 
     # --------------------------------------------------------------------------------
@@ -795,9 +801,10 @@ class Settings(object):
 
     def del_account(self, name):
         """ Delete an account """
-        #! If we delete an account that has no transactions, we could forget its name permanently...
-        #! If we delete an account that does have transactions, we can either forget its name and have a problem when reading the database,
-        #!          or save its name to come back later, possibly as a suggestion when reading the database again
+        #! If we delete an account that has no transactions, we could forget its name permanently.
+        #! If we delete an account that does have transactions, we can either forget its name and
+        #! have a problem when reading the database, or save its name to come back later, possibly
+        #! as a suggestion when reading the database again
         if ((name in self.account_names()) and (name not in self.deleted_account_names())):
             key = self.account_key(name)
             self.options['deletedAccounts'].append(key)
@@ -818,4 +825,3 @@ class Settings(object):
     def save_filters(self):
         print "Setting default filters: %s" % self.filters_str()
         self.save()
-
