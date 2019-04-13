@@ -223,7 +223,7 @@ class Database(object):
         """ Delete record specified by uid """
         for record in self.records:
             if record.uid == uid:
-                if confirm == True:
+                if confirm is True:
                     prompt = "Delete record [%s]? (yes/no) " % record.encode()
                     answer = raw_input(prompt)
                     if answer == "yes":
@@ -237,7 +237,7 @@ class Database(object):
         """ Sorts the records in the database. """
         self.records.sort()
         # If database was marked changed by something, leave it marked as such
-        if self.is_changed == False:
+        if self.is_changed is False:
             self.is_changed = perm
 
     def encode(self):
@@ -278,7 +278,7 @@ class Database(object):
                 if acc not in self.settings.deleted_account_keys():
                     balance[acc] += delta
                     record.set_running_balance(acc, balance[acc])
-            if record.visible == True:
+            if record.visible is True:
                 for acc, delta in record.deltas.iteritems():
                     if acc not in self.settings.deleted_account_keys():
                         if record.date > self.settings.TODAY - self.settings.ONEWEEK:
@@ -371,8 +371,8 @@ class Database(object):
         date_set = False
 
         for record in self.records:
-            if (visible_only == True and record.visible == True) or visible_only == False:
-                if date_set == False:
+            if (visible_only and record.visible) or visible_only is False:
+                if date_set is False:
                     current_date = record.date
                     date_set = True
                 this_date = record.date
@@ -423,8 +423,8 @@ class Database(object):
         date_set = False # Need to find first visible record before setting date
 
         for record in self.records:
-            if (visible_only == True and record.visible == True) or visible_only == False:
-                if date_set == False:
+            if (visible_only and record.visible) or visible_only is False:
+                if date_set is False:
                     # Get the date of the first record we're actually printing
                     current_date = record.date
                     date_set = True
@@ -542,32 +542,32 @@ class Database(object):
             type = type[1:]
         types = str.split(type, ',')
         for record in self.records:
-            if record.visible == True and (record.type in types):
+            if record.visible and (record.type in types):
                 record.visible = flag
-            elif record.visible == True:
+            elif record.visible:
                 record.visible = not flag
 
     def filter_recipient(self, dest, flag=True):
         """ Filter records that match recipient """
         recips = str.split(dest, ',')
         for record in self.records:
-            if record.visible == True and (record.dest in recips):
+            if record.visible and (record.dest in recips):
                 record.visible = flag
-            elif record.visible == True:
+            elif record.visible:
                 record.visible = not flag
 
     def filter_uid(self, uid, flag=True):
         """ Filter for specific UID and only UID"""
         for record in self.records:
-            if record.visible == True and record.uid == uid:
+            if record.visible and record.uid == uid:
                 record.visible = flag
-            elif record.visible == True:
+            elif record.visible:
                 record.visible = not flag
 
     def filter_string(self, filter, flag=True):
         """ Filter according to whether record description contains a string """
         for record in self.records:
-            if record.visible == True:
+            if record.visible:
                 if record.desc.find(filter) >= 0 or record.dest.find(filter) >= 0:
                     record.visible = flag
                 else:
@@ -584,7 +584,7 @@ class Database(object):
         if valmin is None and valmax is None:
             return
         for record in self.records:
-            if record.visible == True:
+            if record.visible:
                 if valmin != None and record.value() < valmin:
                     record.visible = not flag
                 if valmax != None and record.value() > valmax:
@@ -605,9 +605,9 @@ class Database(object):
                 # Now find records with non-zero deltas for this account
                 for record in self.records:
                     if key in record.deltas:
-                        if record.deltas[key] != 0.0 and record.visible == True:
+                        if record.deltas[key] != 0.0 and record.visible:
                             record.visible = flag
-                    elif record.visible == True:
+                    elif record.visible:
                         record.visible = not flag
             else:
                 print 'Account %s does not exist' % account
@@ -621,7 +621,7 @@ class Database(object):
             maxdate = self.settings.TODAY+timedelta(1)
 
         for record in self.records:
-            if record.visible == True:
+            if record.visible:
                 if record.date < mindate or record.date >= maxdate:
                     record.visible = not flag
 
