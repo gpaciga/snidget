@@ -25,7 +25,7 @@ import plotter
 #! Totals
 #! Tooltips
 
-class SnidgetGUI:
+class SnidgetGUI(object):
 
     # --------------------------------------------------------------------------
     # Dialogs

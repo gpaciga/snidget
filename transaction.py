@@ -4,7 +4,7 @@ from datetime import date
 from time import time
 import readline
 
-class Transaction:
+class Transaction(object):
     """ Transaction class, containing info on individual transactions"""
     def __init__(self, database, settings, record_string=""):
         """ Parse a string into a new transaction, or create an empty one """

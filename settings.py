@@ -19,7 +19,7 @@ import sys
 import os
 import pickle
 
-class Settings:
+class Settings(object):
     """ Manage and store user settings """
 
     # Set some convenient constants

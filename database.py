@@ -8,7 +8,7 @@ import transaction
 # It is basically a container object for all the transactions on record,
 # including the functions for determining which records to show when printed
 
-class Database:
+class Database(object):
     """ Database class, which holds and organizes transactions."""
     def __init__(self, settings):
         """ Create a new database from the given filename """
