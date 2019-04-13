@@ -73,11 +73,13 @@ class Settings(object):
         # They are the same strings you would use on the command line
 
         # Example filters:
-        # dates: Date ranges, e.g. '2009-01-01,2009-07-01' or a number of weeks to show, e.g. 'W1' or 'W52'
+        # dates: Date ranges, e.g. '2009-01-01,2009-07-01'
+        #        or a number of weeks to show, e.g. 'W1' or 'W52'
         # accounts: List of accounts to include, e.g. 'BMO,RBC'
         # types: List of types to display, e.g. 'Income,Bill'
         # string: Require this string in the description, e.g. "Tim Horton's"
-        # values: A maximum and minimum value for transactions to show, e.g. '-20,0' means expenses less than $20
+        # values: A maximum and minimum value for transactions to show,
+        #         e.g. '-20,0' means expenses less than $20
         # uid: Exclude UIDs in the list, e.g. '13gG3X,3ys93D,49sKaP'
 
         'FILTERS': {
@@ -282,7 +284,7 @@ class Settings(object):
                 self.set_total_values(True)
             else:
                 self.set_total_values(False)
-            print "Changed totalvalues from '%s' to '%s'" % (old_total_values, self.totalvalues())
+            print "Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values())
             changed_options = True
 
         #   not=x
@@ -390,7 +392,7 @@ class Settings(object):
         i = 0
         while True:
             key = "A%d" % i
-            if key not in self.accountKeys():
+            if key not in self.account_keys():
                 break
             else:
                 i = i+1
