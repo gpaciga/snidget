@@ -24,7 +24,7 @@ def plotwindow():
     vbox.pack_start(canvas)
 
     # get the data
-    weekly_integration = snidget.database.integrate(n=7)
+    weekly_integration = snidget.database.integrate(num_days=7)
     dates = []
     deltas = []
     for datum in weekly_integration:

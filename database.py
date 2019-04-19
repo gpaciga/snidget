@@ -393,8 +393,8 @@ class Database(object):
         return values
 
 
-    def integrate(self, n=7, visible_only=True, independent=False):
-        """ Return deltas integrated over previous n days, 7 by default """
+    def integrate(self, num_days=7, visible_only=True, independent=False):
+        """ Return deltas integrated over previous days, 7 by default """
 
         self.apply_filters()
 
@@ -403,7 +403,7 @@ class Database(object):
         # Declare the array we will hold intermediate values in
         #! This could be extended to keep track of each separate account
         dtotals = []
-        for i in range(0, n):
+        for i in range(0, num_days):
             dtotals.append(0.0)
 
         total = 0.0
@@ -412,7 +412,7 @@ class Database(object):
         self.sort(perm=False)
 
         i = 0 # index of dtotals, should go from 0 to n-1
-        ndays = 0 # counts days done so far
+        days_done = 0 # counts days done so far
         date_set = False # Need to find first visible record before setting date
 
         for record in self.records:
@@ -429,24 +429,24 @@ class Database(object):
                     while this_date != current_date:
 
                         # Go on to the next day
-                        if ndays >= (n-1):
+                        if days_done >= (num_days - 1):
                             # Print every day if we don't care about keeping points independent
                             # Else just print every nth point
-                            if (not independent) or (ndays%n == n-1):
+                            if (not independent) or (days_done % n == n - 1):
                                 values.append((current_date, sum(dtotals)))
                                 total += sum(dtotals)
-                        i = (i+1)%n
-                        current_date = current_date+timedelta(1)
+                        i = (i + 1) % num_days
+                        current_date = current_date + timedelta(1)
                         # If still not at the right day, set this day to 0 value
                         if current_date != this_date:
                             dtotals[i] = 0.0
-                        ndays += 1
+                        days_done += 1
 
                     # Now we have the correct day, add it
                     dtotals[i] = record.value()
 
-        if ndays >= n:
-            if (not independent) or (ndays%n == n-1):
+        if days_done >= num_days:
+            if (not independent) or (days_done % num_days == num_days - 1):
                 values.append((current_date, sum(dtotals)))
                 total += sum(dtotals)
 

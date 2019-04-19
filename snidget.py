@@ -78,21 +78,21 @@ def parse_args(argv):
                 print output
 
         elif opt == "-d":
-            # Integrate over n days, argument required.
+            # Integrate over some number of days, argument required.
             # -d 7 is the same as -w
             #! Should this be a function in the database class?
             total = 0.0
             num = 0
             try:
-                n = int(arg)
+                num_days = int(arg)
             except:
                 print "Invalid option: -d " + arg
-            for datapoint in database.integrate(n):
+            for datapoint in database.integrate(num_days):
                 # datapoint is a (date, float) tuple
                 print "%s %.2f" % datapoint
                 total += float(datapoint[1])
                 num += 1
-            ave = total/num
+            ave = total/num if num > 0 else 0
             print "# Average: %.2f" % ave
 
         elif opt == "-e":
@@ -182,7 +182,7 @@ def parse_args(argv):
                 print "%s %.2f" % datapoint
                 total += float(datapoint[1])
                 num += 1
-            ave = total/num
+            ave = total/num if num > 0 else 0
             print "# Average: %.2f" % ave
 
         elif opt == "-x":
