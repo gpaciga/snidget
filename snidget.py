@@ -44,6 +44,7 @@ def parse_args(argv):
     except getopt.GetoptError:
         print "Unrecognized option or bad argument. Use -h to get usage information."
         sys.exit(2)
+
     for opt, arg in opts:
 
         if opt == "-a":
@@ -116,7 +117,7 @@ def parse_args(argv):
         elif opt == "-f":
             if arg == "latex":
                 # Print a latex report
-                latex.output(database)
+                latex.output(__version__, database, settings)
             elif arg == "csv":
                 # Print in CSV
                 print database.__str__(csv=True)
@@ -258,7 +259,7 @@ def parse_args(argv):
 
 
 def start_gui():
-    snidget_gui = gui.SnidgetGUI()
+    snidget_gui = gui.SnidgetGUI(database, settings)
     snidget_gui.main()
 
 

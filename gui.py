@@ -6,7 +6,6 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-import snidget
 import transaction
 import plotter
 
@@ -65,7 +64,7 @@ class SnidgetGUI(object):
 
         # Get the record or get a new record
         if record is None:
-            record = transaction.Transaction(snidget.database, snidget.settings)
+            record = transaction.Transaction(self.database, self.settings)
             is_new = True # use to know whether to add or not
         else:
             is_new = False
@@ -97,7 +96,7 @@ class SnidgetGUI(object):
         # type
         frame_type = gtk.Frame("Type")
         type_menu = gtk.combo_box_new_text()
-        types = snidget.settings.types()
+        types = self.settings.types()
         for index, expense_type in enumerate(types):
             type_menu.append_text(expense_type)
             if record.type == expense_type:
@@ -121,7 +120,7 @@ class SnidgetGUI(object):
         location_completer = gtk.EntryCompletion()
         entry_location.set_completion(location_completer)
         location_list = gtk.ListStore(str)
-        for place in snidget.database.places():
+        for place in self.database.places():
             location_list.append([place])
         location_completer.set_model(location_list)
         location_completer.set_text_column(0)
@@ -139,7 +138,7 @@ class SnidgetGUI(object):
         description_completer = gtk.EntryCompletion()
         entry_description.set_completion(description_completer)
         description_list = gtk.ListStore(str)
-        for place in snidget.database.descriptions():
+        for place in self.database.descriptions():
             description_list.append([place])
         description_completer.set_model(description_list)
         description_completer.set_text_column(0)
@@ -153,8 +152,8 @@ class SnidgetGUI(object):
         acc_frames = []
         acc_adjusts = []
         acc_spinners = []
-        for acc in snidget.settings.visible_accounts():
-            this_frame = gtk.Frame(snidget.settings.account_name(acc))
+        for acc in self.settings.visible_accounts():
+            this_frame = gtk.Frame(self.settings.account_name(acc))
             if record.deltas.has_key(acc):
                 this_delta = record.deltas[acc]
             else:
@@ -182,20 +181,20 @@ class SnidgetGUI(object):
             record.type = types[type_menu.get_active()]
             record.dest = entry_location.get_text()
             record.desc = entry_description.get_text()
-            for ind in range(0, len(snidget.settings.visible_accounts())):
+            for ind in range(0, len(self.settings.visible_accounts())):
                 value = acc_spinners[ind].get_value()
                 if value != 0.0:
-                    if record.type in snidget.settings.positive_types():
-                        record.deltas[snidget.settings.visible_account_keys()[ind]] = value
+                    if record.type in self.settings.positive_types():
+                        record.deltas[self.settings.visible_account_keys()[ind]] = value
                     else:
-                        record.deltas[snidget.settings.visible_account_keys()[ind]] = value*-1.0
+                        record.deltas[self.settings.visible_account_keys()[ind]] = value*-1.0
             record.id = entry_id.get_text()
 
             if is_new:
-                snidget.database.add(record)
+                self.database.add(record)
 
             #! Dialog might have completed correctly without changes
-            snidget.database.is_changed = True
+            self.database.is_changed = True
 
             self.set_status("Added record with UID %s" % record.uid)
             #! Would be nice to only update the one row
@@ -219,7 +218,7 @@ class SnidgetGUI(object):
         use_max = False
 
         # Get current filter values
-        current_values = snidget.database.filters['values']
+        current_values = self.database.filters['values']
         if current_values is not None:
             # There is a filter
             current_values = current_values.split(',')
@@ -280,7 +279,7 @@ class SnidgetGUI(object):
                 if use_max:
                     new_values += str(max_val)
 
-            snidget.database.filters['values'] = new_values
+            self.database.filters['values'] = new_values
             #! Should make status smarter about what happened
             self.set_status("Limiting values: %s" % new_values)
             self.write_table()
@@ -298,15 +297,15 @@ class SnidgetGUI(object):
 
         # Get which types are currently included by the filter
         # None means all types are included
-        current_types = snidget.database.filters['types']
+        current_types = self.database.filters['types']
         if current_types is None:
-            current_types = snidget.settings.types()
+            current_types = self.settings.types()
         else:
             current_types = current_types.split(',')
 
         # Add all the types to the dialog, checked or not
         type_checks = []
-        for expense_type in snidget.settings.types():
+        for expense_type in self.settings.types():
             this_check = gtk.CheckButton(label=expense_type)
             if expense_type in current_types:
                 this_check.set_active(True)
@@ -328,16 +327,16 @@ class SnidgetGUI(object):
             new_types = ''
             for index, type_check in enumerate(type_checks):
                 if type_check.get_active() is True:
-                    new_types += snidget.settings.types()[index] + ','
+                    new_types += self.settings.types()[index] + ','
 
             # Cut off the last comma
             new_types = new_types[0:-1]
 
             # Set the new filter
             if not new_types:
-                snidget.database.filters['types'] = None
+                self.database.filters['types'] = None
             else:
-                snidget.database.filters['types'] = new_types
+                self.database.filters['types'] = new_types
 
             # Update the table
             self.set_status("Showing types: %s" % new_types)
@@ -357,15 +356,15 @@ class SnidgetGUI(object):
         # Get which accounts are currently included by the filter
         # None means all accounts are included
         # Recall that accounts are given by NAME in the filter
-        current_accounts = snidget.database.filters['accounts']
+        current_accounts = self.database.filters['accounts']
         if current_accounts is None:
-            current_accounts = snidget.settings.account_names()
+            current_accounts = self.settings.account_names()
         else:
             current_accounts = current_accounts.split(',')
 
         # Add all the types to the dialog, checked or not
         account_checks = []
-        for account in snidget.settings.account_names():
+        for account in self.settings.account_names():
             this_check = gtk.CheckButton(label=account)
             if account in current_accounts:
                 this_check.set_active(True)
@@ -387,16 +386,16 @@ class SnidgetGUI(object):
             new_accounts = ''
             for index, account_check in enumerate(account_checks):
                 if account_check.get_active() is True:
-                    new_accounts += snidget.settings.account_names()[index] + ','
+                    new_accounts += self.settings.account_names()[index] + ','
 
             # Cut off the last comma
             new_accounts = new_accounts[0:-1]
 
             # Set the new filter
             if not new_accounts:
-                snidget.database.filters['accounts'] = None
+                self.database.filters['accounts'] = None
             else:
-                snidget.database.filters['accounts'] = new_accounts
+                self.database.filters['accounts'] = new_accounts
 
             # Update the table
             self.set_status("Showing accounts: %s" % new_accounts)
@@ -418,20 +417,20 @@ class SnidgetGUI(object):
         cal_end = gtk.Calendar()
 
         # Set the minimum and maximum possible ranges
-        date_min = snidget.database.records[0].date
-        date_max = snidget.database.settings.TODAY + timedelta(1)
+        date_min = self.database.records[0].date
+        date_max = self.database.settings.TODAY + timedelta(1)
 
         # Parse the filter to set the initial dates
-        if snidget.database.filters['dates'] is None:
+        if self.database.filters['dates'] is None:
             date_start = date_min
             date_end = date_max
-        elif str.find(snidget.database.filters['dates'], 'W') >= 0:
+        elif str.find(self.database.filters['dates'], 'W') >= 0:
             # Set start date to nweeks ago
-            nweeks = int(snidget.database.filters['dates'][1:])
-            date_start = snidget.database.settings.TODAY - timedelta(nweeks*7)
+            nweeks = int(self.database.filters['dates'][1:])
+            date_start = self.database.settings.TODAY - timedelta(nweeks*7)
             date_end = date_max
         else:
-            dates = str.split(snidget.database.filters['dates'], ',')
+            dates = str.split(self.database.filters['dates'], ',')
             if dates[0] == '':
                 date_start = date_min
             else:
@@ -468,7 +467,7 @@ class SnidgetGUI(object):
                 date_end[0], date_end[1]+1, date_end[2]
             )
 
-            snidget.database.filters['dates'] = filter_string
+            self.database.filters['dates'] = filter_string
             self.set_status("Set date range to %s." % filter_string)
             self.write_table()
 
@@ -524,11 +523,11 @@ class SnidgetGUI(object):
         entry = gtk.Entry()
 
         # Set current filter as default
-        current_uids = snidget.database.filters['uid']
+        current_uids = self.database.filters['uid']
         if current_uids is None:
             default = ""
         else:
-            default = snidget.database.filters['uid']
+            default = self.database.filters['uid']
         entry.set_text(default)
 
         # This allows you to press enter to submit
@@ -544,7 +543,7 @@ class SnidgetGUI(object):
             new_uids = entry.get_text()
             if new_uids == '':
                 new_uids = None
-            snidget.database.filters['uid'] = new_uids
+            self.database.filters['uid'] = new_uids
             self.set_status("Excluded UID %s" % str(new_uids))
             self.write_table()
 
@@ -564,10 +563,10 @@ class SnidgetGUI(object):
         entry = gtk.Entry()
 
         # Set the default if a string filter exists
-        if snidget.database.filters['string'] is None:
+        if self.database.filters['string'] is None:
             default = ''
         else:
-            default = snidget.database.filters['string']
+            default = self.database.filters['string']
         entry.set_text(default)
 
         # This allows you to press enter to submit
@@ -587,10 +586,10 @@ class SnidgetGUI(object):
             text = entry.get_text()
             if text == '':
                 # empty string means no filter
-                snidget.database.filters['string'] = None
+                self.database.filters['string'] = None
                 self.set_status("String filter removed.")
             else:
-                snidget.database.filters['string'] = str(text)
+                self.database.filters['string'] = str(text)
                 self.set_status("String filter '%s' applied." % str(text))
             self.write_table()
 
@@ -605,14 +604,14 @@ class SnidgetGUI(object):
 
     def call_showall(self, widget, data):
         """ Write table with no filters """
-        snidget.database.reset_filters()
+        self.database.reset_filters()
         self.set_status("Reset all filters.")
         self.write_table()
 
 
     def call_defaults(self, widget, data):
         """ Write table with default filters """
-        snidget.database.set_filter_defaults()
+        self.database.set_filter_defaults()
         self.set_status("Applied default filters.")
         self.write_table()
 
@@ -620,8 +619,8 @@ class SnidgetGUI(object):
     def call_expenses(self, widget, data):
         """ Set filter to expense types """
         #! Will want to generalize what an expense type is
-        snidget.database.filters['types'] = 'Food,School,Household,Extras'
-        self.set_status("Applied filter types: %s" % snidget.database.filters['types'])
+        self.database.filters['types'] = 'Food,School,Household,Extras'
+        self.set_status("Applied filter types: %s" % self.database.filters['types'])
         self.write_table()
 
 
@@ -653,7 +652,7 @@ class SnidgetGUI(object):
 
 
     def call_plot(self, widget, data):
-        plotter.plotwindow()
+        plotter.plot_window(self.database)
 
 
     def call_new(self, widget, data):
@@ -669,7 +668,7 @@ class SnidgetGUI(object):
 
 
     def call_sort(self, widget, data):
-        snidget.database.sort()
+        self.database.sort()
         self.write_table(save_state=False)
 
 
@@ -719,7 +718,7 @@ class SnidgetGUI(object):
         """ Push current state onto history """
         state = {
             'mode': self.display_mode,
-            'filters': snidget.database.filters.copy(),
+            'filters': self.database.filters.copy(),
             'status': self.status_text
         }
 
@@ -737,7 +736,7 @@ class SnidgetGUI(object):
             # Load the state
             state = self.history[self.history_index]
             self.display_mode = state['mode']
-            snidget.database.filters = state['filters']
+            self.database.filters = state['filters']
             self.set_status(state['status'])
             self.write_table(save_state=False)
 
@@ -748,7 +747,7 @@ class SnidgetGUI(object):
             self.history_index = self.history_index + 1
             state = self.history[self.history_index]
             self.display_mode = state['mode']
-            snidget.database.filters = state['filters']
+            self.database.filters = state['filters']
             self.set_status(state['status'])
             self.write_table(save_state=False)
 
@@ -760,8 +759,8 @@ class SnidgetGUI(object):
     def get_table(self):
         """ Write the database into a ListStore for TreeView """
         listmodel = gtk.ListStore(object)
-        snidget.database.apply_filters()
-        for record in snidget.database.records:
+        self.database.apply_filters()
+        for record in self.database.records:
             if record.visible:
                 listmodel.append([record])
         return listmodel
@@ -830,13 +829,13 @@ class SnidgetGUI(object):
 
     def save_database(self):
         """ Save the database """
-        snidget.database.save()
+        self.database.save()
         self.set_status("Saved the database.")
 
 
     def quit_program(self):
         ok = True # will be made False if save dialog canceled
-        if snidget.database.is_changed is True:
+        if self.database.is_changed is True:
             ok = self.dialog_save()
             # We will be quitting if OK, so print the "Saved" message to the terminal
             if ok is True:
@@ -855,7 +854,10 @@ class SnidgetGUI(object):
         self.status_text = string
 
 
-    def __init__(self):
+    def __init__(self, database, settings):
+
+        self.database = database
+        self.settings = settings
 
         # Internals
         self.display_mode = "Transactions"
@@ -885,7 +887,7 @@ class SnidgetGUI(object):
         # Status bar
         self.statusbar = gtk.Statusbar()
         self.box_vmain.pack_end(self.statusbar, False, False, 0)
-        self.set_status("Welcome to Snidget! (version %s)" % snidget.__version__)
+        self.set_status("Welcome to Snidget!")
         self.statusbar.set_has_resize_grip(True)
         self.statusbar.show()
 
@@ -1059,7 +1061,7 @@ class SnidgetGUI(object):
         self.treeview = gtk.TreeView()
 
         #! Need to make columns flexible for different view modes
-        column_names = snidget.database.headings()
+        column_names = self.database.headings()
         self.tvcolumn = [None] * len(column_names)
         for index, column_name in enumerate(column_names):
             cell = gtk.CellRendererText()
@@ -1100,7 +1102,3 @@ class SnidgetGUI(object):
         gtk.main()
         return 0
 
-
-if __name__ == "__main__":
-    snidget = SnidgetGUI()
-    snidget.main()
