@@ -432,7 +432,7 @@ class Database(object):
                         if days_done >= (num_days - 1):
                             # Print every day if we don't care about keeping points independent
                             # Else just print every nth point
-                            if (not independent) or (days_done % n == n - 1):
+                            if (not independent) or (days_done % num_days == num_days - 1):
                                 values.append((current_date, sum(dtotals)))
                                 total += sum(dtotals)
                         i = (i + 1) % num_days
