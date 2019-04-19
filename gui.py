@@ -99,8 +99,8 @@ class SnidgetGUI(object):
         type_menu = gtk.combo_box_new_text()
         types = snidget.settings.types()
         for index, expense_type in enumerate(types):
-            type_menu.append_text(expense_types)
-            if record.type == expense_types:
+            type_menu.append_text(expense_type)
+            if record.type == expense_type:
                 type_menu.set_active(index)
         frame_type.add(type_menu)
         hbox_top.pack_start(frame_type, False, False, 5)
@@ -1063,7 +1063,7 @@ class SnidgetGUI(object):
         self.tvcolumn = [None] * len(column_names)
         for index, column_name in enumerate(column_names):
             cell = gtk.CellRendererText()
-            self.tvcolumn[n] = gtk.TreeViewColumn(column_name, cell)
+            self.tvcolumn[index] = gtk.TreeViewColumn(column_name, cell)
             if index > 3:
                 cell.set_property('xalign', 1.0)
             self.tvcolumn[index].set_cell_data_func(cell, self.cell_value, index)
