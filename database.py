@@ -715,21 +715,24 @@ class Database(object):
         if (self.filters['columns'] is not None
                 and self.filters['columns'] not in ["None", "none", "All", "all"]):
             allowed = self.filters['columns'].split(',')
+
             if name in self.settings.account_names():
                 return bool(name in allowed)
-            elif name in self.settings.account_keys():
+
+            if name in self.settings.account_keys():
                 # First convert the names allowed to their keys
                 allowed_keys = []
                 for account in allowed:
                     allowed_keys.append(self.settings.account_key(account))
                 return bool(name in allowed_keys)
-            else:
-                print "Error: account %s not recognized in is_printable" % name
-                return False
-        elif self.filters['columns'] in ["None", "none"]:
+
+            print "Error: account %s not recognized in is_printable" % name
             return False
-        else:
-            return True # no columns = all columns
+
+        if self.filters['columns'] in ["None", "none"]:
+            return False
+
+        return True # no columns = all columns
 
     # EXTRA STUFF FOR POSSIBLE GUI
     def headings(self):
