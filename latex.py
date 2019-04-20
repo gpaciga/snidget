@@ -1,5 +1,7 @@
 """ Print database as a latex table """
 
+from __future__ import print_function
+
 # A way of outputting a bare-bones financial report from the database
 # which, presumably, one can augment as required to make sense of things.
 

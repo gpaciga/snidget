@@ -1,5 +1,6 @@
 """ Defines transaction class, containing info on individual transactions"""
 
+from __future__ import print_function
 from datetime import date
 from time import time
 import readline

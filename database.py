@@ -1,5 +1,6 @@
 """ Defines Database class which contains and organizes all transaction records."""
 
+from __future__ import print_function
 import sys
 from datetime import timedelta, date
 import transaction

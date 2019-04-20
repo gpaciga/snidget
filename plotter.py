@@ -1,3 +1,4 @@
+from __future__ import print_function
 import gtk
 from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
 from matplotlib.figure import Figure

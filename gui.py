@@ -1,5 +1,6 @@
 # GTK+ GUI for Snidget
 
+from __future__ import print_function
 from datetime import date, timedelta
 import sys
 import pygtk

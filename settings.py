@@ -12,6 +12,7 @@
 #! Add a way to print the current filters alone in a nice way
 #! and to save the current filters as the default
 
+from __future__ import print_function
 import urllib2
 import json
 from datetime import date, timedelta

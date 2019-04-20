@@ -12,6 +12,7 @@
 #! If you change the database to a file which does not exist,
 #! that error on loading the database will not let us get as far as the -o command to fix it!
 
+from __future__ import print_function
 import sys # to get command line options
 import getopt # to parse command line options
 
