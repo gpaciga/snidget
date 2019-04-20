@@ -7,8 +7,8 @@ import pygtk
 pygtk.require('2.0')
 import gtk
 
-import transaction
-import plotter
+from snidget import settings, database, transaction, plotter
+
 
 #! special transfer dialog
 #! dialog for user settings
@@ -855,10 +855,10 @@ class SnidgetGUI(object):
         self.status_text = string
 
 
-    def __init__(self, database, settings):
+    def __init__(self):
 
-        self.database = database
-        self.settings = settings
+        self.settings = settings.Settings()
+        self.database = database.Database(settings)
 
         # Internals
         self.display_mode = "Transactions"
@@ -1095,7 +1095,6 @@ class SnidgetGUI(object):
         self.window.show()
 
 
-    def main(self):
+    def start(self):
         gtk.main()
         return 0
-

@@ -1,6 +1,7 @@
 """ Print database as a latex table """
 
 from __future__ import print_function
+import snidget
 
 # A way of outputting a bare-bones financial report from the database
 # which, presumably, one can augment as required to make sense of things.
@@ -9,13 +10,13 @@ from __future__ import print_function
 #! the straight up -p version, but with latex markup for adding to a document,
 #  (while keeping the option to have \begin{document} etc type markup).
 
-def output(version, database, settings):
+def output(database, settings):
     """ Print database as latex table """
 
     print("\\documentclass{article}")
     print("\\begin{document}")
     print("\\title{Expense Report}")
-    print("\\author{Snidget v%s}" % version)
+    print("\\author{Snidget v%s}" % snidget.__version__)
 
     #! Print balances at beginning of time period
     #! Print balances at end of time period

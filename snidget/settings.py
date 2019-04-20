@@ -20,6 +20,7 @@ import sys
 import os
 import pickle
 
+
 def get_open_exchange_rates():
     """ Use open exchange rate API to get exchange rates """
     app_id = '07da2e05cce04ac48280eb00ce9e3eca' # should be a setting?

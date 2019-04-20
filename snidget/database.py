@@ -3,7 +3,7 @@
 from __future__ import print_function
 import sys
 from datetime import timedelta, date
-import transaction
+from snidget import transaction
 
 # Defines Database class, the main workhorse in the Snidget program
 # It is basically a container object for all the transactions on record,
