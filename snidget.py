@@ -86,8 +86,9 @@ def parse_args(argv):
             num = 0
             try:
                 num_days = int(arg)
-            except:
+            except ValueError:
                 print("Invalid option: -d " + arg)
+                continue
             for datapoint in database.integrate(num_days):
                 # datapoint is a (date, float) tuple
                 print("%s %.2f" % datapoint)

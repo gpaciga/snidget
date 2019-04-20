@@ -293,7 +293,7 @@ class Transaction(object):
 
                 try:
                     self.date = date(input_year, input_month, input_day) # Transaction date
-                except:
+                except ValueError:
                     print("ERROR: could not interpret %s" % date_string)
                     continue
 

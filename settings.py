@@ -372,16 +372,16 @@ class Settings(object):
                 print("Could not set exchange rate")
 
         elif command == 'setexchange':
-            try:
-                args = arg.split(":")
+            args = arg.split(":")
+            if len(args) == 2:
                 currency = args[0]
                 rate = float(args[1])
-            except:
-                print("Could not parse argument %s" % arg)
-            if self.set_exchange(currency, rate):
-                changed_options = True
+                if self.set_exchange(currency, rate):
+                    changed_options = True
+                else:
+                    print("Could not set exchange rate of %s" % currency)
             else:
-                print("Could not set exchange rate of %s" % currency)
+                print("Count not parse argument %s" % arg)
 
         elif command == 'renameaccount':
             print("Cannot rename accounts yet")
@@ -557,12 +557,12 @@ class Settings(object):
 
     def total_values(self):
         """ Return the totalValues setting """
-        return self.options['TOTALVALUES']
+        return self.options.get('TOTALVALUES', False)
 
 
     def maxprint(self):
         """ Return the maxprint value """
-        return self.options['MAXPRINT']
+        return self.options.get('MAXPRINT', 25)
 
 
     def allowance(self):
@@ -729,7 +729,7 @@ class Settings(object):
             if (len(args[1]) != 3 or not args[1].isalpha()):
                 print("%s is not a 3-character currency code" % args[1])
                 return False
-        except:
+        except IndexError:
             print("Could not get currency code from %s" % args)
             return False
         name = args[0]

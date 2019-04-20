@@ -52,18 +52,10 @@ class Database(object):
         if "maxprint" in self.filters:
             maxprint = self.filters['maxprint']
         else:
-            try:
-                maxprint = self.settings.maxprint()
-            except:
-                print ("Unable to find user settings, setting maxprint to 25")
-                maxprint = 25
+            maxprint = self.settings.maxprint()
 
         if total_value is None:
-            try:
-                total_value = self.settings.total_values()
-            except:
-                print("Unable to find user settings")
-                total_value = False
+            total_value = self.settings.total_values()
 
         self.apply_filters()
         balances = self.balances()
@@ -647,12 +639,11 @@ class Database(object):
                 mindate = date(int(mindate[0]), int(mindate[1]), int(mindate[2]))
 
                 # Look for second date, and use it to set filter if it's there
-                try:
+                if len(args) == 2 and args[1]:
                     maxdate = str.split(args[1], "-")
-                     # Transaction date
                     maxdate = date(int(maxdate[0]), int(maxdate[1]), int(maxdate[2]))
                     self.filter_date(mindate, maxdate)
-                except:
+                else:
                     self.filter_date(mindate)
 
         # Apply the accounts filter
