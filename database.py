@@ -55,7 +55,7 @@ class Database(object):
             try:
                 maxprint = self.settings.maxprint()
             except:
-                print "Unable to find user settings, setting maxprint to 25"
+                print ("Unable to find user settings, setting maxprint to 25")
                 maxprint = 25
 
         if total_value is None:
@@ -406,8 +406,6 @@ class Database(object):
         for i in range(0, num_days):
             dtotals.append(0.0)
 
-        total = 0.0
-
         # We require the transactions to be in chronological order
         self.sort(perm=False)
 
@@ -434,7 +432,6 @@ class Database(object):
                             # Else just print every nth point
                             if (not independent) or (days_done % num_days == num_days - 1):
                                 values.append((current_date, sum(dtotals)))
-                                total += sum(dtotals)
                         i = (i + 1) % num_days
                         current_date = current_date + timedelta(1)
                         # If still not at the right day, set this day to 0 value
@@ -448,7 +445,6 @@ class Database(object):
         if days_done >= num_days:
             if (not independent) or (days_done % num_days == num_days - 1):
                 values.append((current_date, sum(dtotals)))
-                total += sum(dtotals)
 
         return values
     #! The above stops on the last record, not the last day in the range
