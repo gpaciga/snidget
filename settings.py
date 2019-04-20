@@ -176,6 +176,8 @@ class Settings(object):
             options_pickle.close()
             print("Pickled default options. You should not get this message again.")
 
+        self.register_commands()
+
 
     def __str__(self):
         """ Convert current options into string for printing """
@@ -228,170 +230,263 @@ class Settings(object):
         print("Saved options")
 
 
+    def register_commands(self):
+        self.commands = {
+            'print': {
+                'args': '',
+                'desc': 'Special command to print the current options in an ugly way.',
+                'parser': self._parse_print,
+            },
+            'help' : {
+                'args': '',
+                'desc': 'Print this help.',
+                'parser': self._parse_help,
+            },
+            'save': {
+                'args': '',
+                'desc': 'Save current filters as the default and save any changes to settings.',
+                'parser': self._parse_save,
+            },
+            'database': {
+                'args': 'filename',
+                'desc': 'Change the database file used.',
+                'parser': self._parse_database,
+            },
+            'maxprint': {
+                'args': 'integer',
+                'desc': 'The maximum number of records to print when -N or -U not specified',
+                'parser': self._parse_maxprint,
+            },
+            'allowance': {
+                'args': 'value',
+                'desc': 'Setting the weekly allowance value (set to 0 to disable)',
+                'parser': self._parse_allowance,
+            },
+            'totalvalues': {
+                'args': 'boolean',
+                'desc': 'Display the total change in balance instead of each account if true.',
+                'parser': self._parse_totalvalues,
+            },
+            'not': {
+                'args': 'x',
+                'desc': 'Set the character used to negate strings and types to x.',
+                'parser': self._parse_not,
+            },
+            'addplace': {
+                'args': 'name',
+                'desc': 'Add a suggested place name.',
+                'parser': self._parse_addplace,
+            },
+            'delplace': {
+                'args': 'name',
+                'desc': 'Remove a suggested place name.',
+                'parser': self._parse_delplace,
+            },
+            'addtype': {
+                'args': 'name',
+                'desc': 'Add a new type of record.',
+                'parser': self._parse_addtype,
+            },
+            'deltype': {
+                'args': 'name',
+                'desc': 'Remove a type of record.',
+                'parser': self._parse_deltype,
+            },
+            'addaccount': {
+                'args': 'name',
+                'desc': 'Add a new account or restore one that has been hidden with "delaccount".',
+                'parser': self._parse_addaccount,
+            },
+            'delaccount': {
+                'args': 'name',
+                'desc': 'Hide an account in a more persistent way than -C provides.',
+                'parser': self._parse_delaccount,
+            },
+            'addforeign': {
+                'args': 'name:CUR',
+                'desc': ('Add an account with the currency CUR instead of %s.'
+                         % self.options['defaultCurrency']),
+                'parser': self._parse_addforeign,
+            },
+            'getexchange': {
+                'args': 'CUR',
+                'desc': 'Update the exchange rate for CUR using Google.',
+                'parser': self._parse_getexchange,
+            },
+            'setexchange': {
+                'args': 'CUR:value',
+                'desc': 'Manually set the exchange rate for CUR to value.',
+                'parser': self._parse_setexchange,
+            },
+        }
+
     def edit(self, command):
         """ Change an option """
 
         # Keep track of whether a change is made
         changed_options = False
-
         args = str.split(command, '=')
 
-        # Check the format of the argument
-        if args[0] == 'print':
-            print(self)
-            return changed_options
-        elif args[0] == 'save':
-            self.save_filters()
-            return changed_options
-        elif args[0] == 'help':
-            print("Argument for -o are typically of the format command=argument, where argument is the new value for the setting.")
-            print("Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings.")
-            print("  database=filename       Change the database file used.")
-            print("  maxprint=integer        The maximum number of records to print (deprecated, used only when -N or -U not specified)")
-            print("  allowance=value         Setting the weekly allowance value (set to 0 to disable)")
-            print("  totalvalues=boolean     Whether to display the total value of a record or the delta of each account.")
-            print("  not=x                   Set the character used to negate strings and types to x.")
-            print("  addplace=name           Add a suggested place name.")
-            print("  delplace=name           Remove a suggested place name.")
-            print("  addtype=name            Add a new type of record.")
-            print("  deltype=name            Remove a type of record.")
-            print("  addaccount=name         Add a new account or restore one that has been hidden with 'delaccount'.")
-            print("  delaccount=name         Hide an account in a more persistent way than -C provides.")
-            print("  addforeign=name:CUR     Add an account with the currency CUR instead of %s." % self.options['defaultCurrency'])
-            print("  currency=CUR            Change the presumed currency of non-foreign accounts to CUR instead of %s." % self.options['defaultCurrency'])
-            print("  getexchange=CUR         Update the exchange rate for CUR using Google.")
-            print("  setexchange=CUR:value   Manually set the exchange rate for CUR to value.")
-            print("  save                    Save current filters as the defaults and commit any other changes to settings.")
-            print("  print                   Special command to print the current options in an ugly way.")
-            print("  help                    Print this help.")
-            return changed_options
-        elif len(args) != 2:
-            print("Options must be changed using command=argument format.")
-            print("Use '-o help' for recognized options.")
-            return changed_options
-
-        command = args[0]
-        arg = args[1]
-
-        # Edit the options accordingly:
-
-        # Change the database file name
-        if command == 'database':
-            old_database = self.database()
-            self.set_database(arg)
-            print("Changed database from '%s' to '%s'" % (old_database, self.database()))
-            changed_options = True
-
-        elif command == 'maxprint':
-            old_maxprint = self.maxprint()
-            self.set_maxprint(arg)
-            print("Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint()))
-            changed_options = True
-
-        elif command == 'allowance':
-            old_allowance = self.allowance()
-            self.set_allowance(arg)
-            print("Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance()))
-            changed_options = True
-
-        elif command == 'totalvalues':
-            old_total_values = self.total_values()
-            if arg == "True" or arg == "true":
-                self.set_total_values(True)
+        if args[0] in self.commands:
+            command_info = self.commands[args[0]]
+            if len(args) == 1 and not command_info['args']:
+                did_change = command_info['parser']()
+            elif len(args) == 2:
+                did_change = command_info['parser'](args[1])
             else:
-                self.set_total_values(False)
-            print("Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values()))
-            changed_options = True
-
-        elif command == 'not':
-            valid = True
-            old_not = self.not_character()
-            if len(arg) != 1:
-                print("NOT character must be a single character")
-                valid = False
-            if arg in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789":
-                print("Alphanumeric characters not recommended for the NOT character")
-                valid = False
-            if valid is True and arg != old_not:
-                self.set_not_character(arg)
-                print("Changed not character from %s to %s" % (old_not, self.not_character()))
-                changed_options = True
-
-        elif command == 'addplace':
-            if self.add_place(arg):
-                print("Added '%s' to places" % arg)
-                changed_options = True
-            else:
-                print("Place %s already exists" % arg)
-
-        elif command == 'delplace':
-            if self.del_place(arg):
-                print("Removed '%s' from places" % arg)
-                changed_options = True
-            else:
-                print("Place not found: %s" % arg)
-
-        elif command == 'addtype':
-            if self.add_type(arg):
-                print("Added '%s' to types" % arg)
-                changed_options = True
-            else:
-                print("Type %s already exists" % arg)
-
-        elif command == 'deltype':
-            if self.del_type(arg):
-                print("Removed type %s" % arg)
-                changed_options = True
-            else:
-                print("Could not remove type %s" % arg)
-
-        elif command == 'addaccount':
-            if self.add_account(arg):
-                print("Added account %s" % arg)
-                changed_options = True
-            else:
-                print("Could not add account %s" % arg)
-
-        elif command == 'delaccount':
-            if self.del_account(arg):
-                print("Deleted account %s" % arg)
-                changed_options = True
-            else:
-                print("Could not delete account %s" % arg)
-
-        elif command == 'addforeign':
-            if self.add_foreign(arg):
-                print("Added foreign account %s" % arg)
-                changed_options = True
-            else:
-                print("Could not add account %s" % arg)
-
-        elif command == 'getexchange':
-            if self.set_exchange(arg, self.get_exchange_rate(arg)):
-                changed_options = True
-            else:
-                print("Could not set exchange rate")
-
-        elif command == 'setexchange':
-            args = arg.split(":")
-            if len(args) == 2:
-                currency = args[0]
-                rate = float(args[1])
-                if self.set_exchange(currency, rate):
-                    changed_options = True
-                else:
-                    print("Could not set exchange rate of %s" % currency)
-            else:
-                print("Count not parse argument %s" % arg)
-
-        elif command == 'renameaccount':
-            print("Cannot rename accounts yet")
-
+                print("Options must be changed using command=argument format.")
+                print("Use '-o help' for recognized options.")
+                did_change = False
+            changed_options = changed_options or did_change
         else:
             print("Unrecognized command. Use -o help for recognized commands.")
 
-        # If anything changed, this will be true
         return changed_options
+
+
+    def _parse_print(self):
+        print(self)
+
+
+    def _parse_save(self):
+        self.save_filters()
+
+
+    def _parse_help(self):
+        print("Argument for -o are typically of the format command=argument, where argument is")
+        print("the new value for the setting. Avoid using -o with any filters, as you may")
+        print("unintentionally overwrite the default filters in the settings.")
+        for command in sorted(self.commands.keys()):
+            description = self.commands[command]['desc']
+            args = self.commands[command]['args']
+            syntax = command
+            if args:
+                syntax += "=" + args
+
+            print("  %-22s  %s" % (syntax, description))
+
+
+    def _parse_database(self, arg):
+        old_database = self.database()
+        self.set_database(arg)
+        print("Changed database from '%s' to '%s'" % (old_database, self.database()))
+        return True
+
+
+    def _parse_maxprint(self, arg):
+        old_maxprint = self.maxprint()
+        self.set_maxprint(arg)
+        print("Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint()))
+        return True
+
+
+    def _parse_allowance(self, arg):
+        old_allowance = self.allowance()
+        self.set_allowance(arg)
+        print("Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance()))
+        return True
+
+
+    def _parse_totalvalues(self, arg):
+        old_total_values = self.total_values()
+        if arg == "True" or arg == "true":
+            self.set_total_values(True)
+        else:
+            self.set_total_values(False)
+        print("Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values()))
+        return True
+
+
+    def _parse_not(self, arg):
+        valid = True
+        old_not = self.not_character()
+        if len(arg) != 1:
+            print("NOT character must be a single character")
+            valid = False
+        if arg in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789":
+            print("Alphanumeric characters not recommended for the NOT character")
+            valid = False
+        if valid is True and arg != old_not:
+            self.set_not_character(arg)
+            print("Changed not character from %s to %s" % (old_not, self.not_character()))
+            return True
+        return False
+
+
+    def _parse_addplace(self, arg):
+        if self.add_place(arg):
+            print("Added '%s' to places" % arg)
+            return True
+        print("Place %s already exists" % arg)
+        return False
+
+
+    def _parse_delplace(self, arg):
+        if self.del_place(arg):
+            print("Removed '%s' from places" % arg)
+            return True
+        print("Place not found: %s" % arg)
+        return False
+
+
+    def _parse_addtype(self, arg):
+        if self.add_type(arg):
+            print("Added '%s' to types" % arg)
+            return True
+        print("Type %s already exists" % arg)
+        return False
+
+
+    def _parse_deltype(self, arg):
+        if self.del_type(arg):
+            print("Removed type %s" % arg)
+            return True
+        print("Could not remove type %s" % arg)
+        return False
+
+
+    def _parse_addaccount(self, arg):
+        if self.add_account(arg):
+            print("Added account %s" % arg)
+            return True
+        print("Could not add account %s" % arg)
+        return False
+
+
+    def _parse_delaccount(self, arg):
+        if self.del_account(arg):
+            print("Deleted account %s" % arg)
+            return True
+        print("Could not delete account %s" % arg)
+        return False
+
+
+    def _parse_addforeign(self, arg):
+        if self.add_foreign(arg):
+            print("Added foreign account %s" % arg)
+            return True
+        print("Could not add account %s" % arg)
+        return False
+
+
+    def _parse_getexchange(self, arg):
+        if self.set_exchange(arg, self.get_exchange_rate(arg)):
+            return True
+        print("Could not set exchange rate")
+        return False
+
+
+    def _parse_setexchange(self, arg):
+        args = arg.split(":")
+        if len(args) == 2:
+            currency = args[0]
+            rate = float(args[1])
+            if self.set_exchange(currency, rate):
+                return True
+            print("Could not set exchange rate of %s" % currency)
+            return False
+        print("Count not parse argument %s" % arg)
+        return False
 
 
     def new_account_key(self):
@@ -633,8 +728,7 @@ class Settings(object):
         if self.updated_rates is True:
             self.options['historicalRates'][self.TODAY] = self.options['exchangeRates']
         else:
-            print("Exchange rates have not been updated.")
-            print("Since they are out of date, they will not be saved as today's rates.")
+            print("Since exchange rates are out of date, they will not be saved as today's rates.")
 
 
     # --------------------------------------------------------------------------------
@@ -788,15 +882,6 @@ class Settings(object):
         if ((name in self.account_names()) and (name not in self.deleted_account_names())):
             key = self.account_key(name)
             self.options['deletedAccounts'].append(key)
-            return True
-        return False
-
-
-    def rename_account(self, oldname, newname):
-        """ Rename an account """
-        if oldname in self.account_names():
-            key = self.account_key(oldname)
-            self.options['accounts'][key] = newname
             return True
         return False
 
