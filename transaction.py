@@ -306,7 +306,7 @@ class Transaction(object):
             date_ok = True
 
         # Get transaction type
-        types = self.settings.types() # [0]=key, [1]=value
+        types = self.settings.types()
 
         # Try to complete type on tab
         readline.set_completer(self.complete_type)

@@ -94,7 +94,7 @@ def parse_args(argv):
                 total += float(datapoint[1])
                 num += 1
             ave = total/num if num > 0 else 0
-            print "# Average: %.2f" % ave
+            print("# Average: %.2f" % ave)
 
         elif opt == "-e":
             # Edit an entry identified by uid=arg

@@ -873,10 +873,6 @@ class SnidgetGUI(object):
 
         self.window.set_icon_from_file("%s/%s" % (sys.path[0], "snidget.png"))
 
-        #icon = gtk.Image()
-        #icon.set_from_stock(gtk.STOCK_INDEX, gtk.ICON_SIZE_MENU)
-        #self.window.set_icon(icon.get_pixbuf())
-
         # For signals from window manager
         self.window.connect("delete_event", self.delete_event)
 

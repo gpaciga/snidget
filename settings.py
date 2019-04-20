@@ -281,21 +281,18 @@ class Settings(object):
             print("Changed database from '%s' to '%s'" % (old_database, self.database()))
             changed_options = True
 
-        #   maxprint=integer
         elif command == 'maxprint':
             old_maxprint = self.maxprint()
             self.set_maxprint(arg)
             print("Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint()))
             changed_options = True
 
-        #   allowance=float
         elif command == 'allowance':
             old_allowance = self.allowance()
             self.set_allowance(arg)
             print("Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance()))
             changed_options = True
 
-        #   totalvalues=boolean
         elif command == 'totalvalues':
             old_total_values = self.total_values()
             if arg == "True" or arg == "true":
@@ -305,7 +302,6 @@ class Settings(object):
             print("Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values()))
             changed_options = True
 
-        #   not=x
         elif command == 'not':
             valid = True
             old_not = self.not_character()
@@ -320,7 +316,6 @@ class Settings(object):
                 print("Changed not character from %s to %s" % (old_not, self.not_character()))
                 changed_options = True
 
-        #   addplace=string
         elif command == 'addplace':
             if self.add_place(arg):
                 print("Added '%s' to places" % arg)
@@ -328,7 +323,6 @@ class Settings(object):
             else:
                 print("Place %s already exists" % arg)
 
-        #   delplace=string
         elif command == 'delplace':
             if self.del_place(arg):
                 print("Removed '%s' from places" % arg)
@@ -336,7 +330,6 @@ class Settings(object):
             else:
                 print("Place not found: %s" % arg)
 
-        #   addtype=word
         elif command == 'addtype':
             if self.add_type(arg):
                 print("Added '%s' to types" % arg)
@@ -344,7 +337,6 @@ class Settings(object):
             else:
                 print("Type %s already exists" % arg)
 
-        #   deltype=word
         elif command == 'deltype':
             if self.del_type(arg):
                 print("Removed type %s" % arg)
@@ -352,7 +344,6 @@ class Settings(object):
             else:
                 print("Could not remove type %s" % arg)
 
-        #   addaccount=word
         elif command == 'addaccount':
             if self.add_account(arg):
                 print("Added account %s" % arg)
@@ -360,7 +351,6 @@ class Settings(object):
             else:
                 print("Could not add account %s" % arg)
 
-        #   delaccount=word
         elif command == 'delaccount':
             if self.del_account(arg):
                 print("Deleted account %s" % arg)
@@ -394,7 +384,6 @@ class Settings(object):
                 print("Could not set exchange rate of %s" % currency)
 
         elif command == 'renameaccount':
-            # self.rename_account(oldname, newname)
             print("Cannot rename accounts yet")
 
         else:
