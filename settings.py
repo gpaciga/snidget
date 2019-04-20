@@ -132,7 +132,7 @@ class Settings(object):
             do_save = False
             for opt, val in defaults.iteritems():
                 if opt not in self.options:
-                    print "Adding new option "+opt
+                    print("Adding new option " + opt)
                     self.options[opt] = val
                     do_save = True
             # Similarly, remove options that are no longer needed
@@ -142,7 +142,7 @@ class Settings(object):
                 if opt not in defaults:
                     delete.append(opt)
             for opt in delete:
-                print "Removing defunct option "+opt
+                print("Removing defunct option " + opt)
                 self.options.pop(opt)
                 do_save = True
 
@@ -150,7 +150,7 @@ class Settings(object):
             # This is basically duplicate code and could be cleaned up....
             for filt, val in defaults['FILTERS'].iteritems():
                 if filt not in self.options['FILTERS']:
-                    print "Adding new filter "+filt
+                    print("Adding new filter " + filt)
                     self.options['FILTERS'][filt] = val
                     do_save = True
             delete = []
@@ -158,7 +158,7 @@ class Settings(object):
                 if filt not in defaults['FILTERS']:
                     delete.append(filt)
             for filt in delete:
-                print "Removing defunct filter "+filt
+                print("Removing defunct filter " + filt)
                 self.options['FILTERS'].pop(filt)
                 do_save = True
 
@@ -173,7 +173,7 @@ class Settings(object):
             options_pickle = open(filename, 'wb')
             pickle.dump(self.options, options_pickle)
             options_pickle.close()
-            print "Pickled default options. You should not get this message again."
+            print("Pickled default options. You should not get this message again.")
 
 
     def __str__(self):
@@ -224,7 +224,7 @@ class Settings(object):
         options_pickle = open(filename, 'wb')
         pickle.dump(self.options, options_pickle)
         options_pickle.close()
-        print "Saved options"
+        print("Saved options")
 
 
     def edit(self, command):
@@ -237,36 +237,36 @@ class Settings(object):
 
         # Check the format of the argument
         if args[0] == 'print':
-            print self
+            print(self)
             return changed_options
         elif args[0] == 'save':
             self.save_filters()
             return changed_options
         elif args[0] == 'help':
-            print "Argument for -o are typically of the format command=argument, where argument is the new value for the setting."
-            print "Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings."
-            print "  database=filename       Change the database file used."
-            print "  maxprint=integer        The maximum number of records to print (deprecated, used only when -N or -U not specified)"
-            print "  allowance=value         Setting the weekly allowance value (set to 0 to disable)"
-            print "  totalvalues=boolean     Whether to display the total value of a record or the delta of each account."
-            print "  not=x                   Set the character used to negate strings and types to x."
-            print "  addplace=name           Add a suggested place name."
-            print "  delplace=name           Remove a suggested place name."
-            print "  addtype=name            Add a new type of record."
-            print "  deltype=name            Remove a type of record."
-            print "  addaccount=name         Add a new account or restore one that has been hidden with 'delaccount'."
-            print "  delaccount=name         Hide an account in a more persistent way than -C provides."
-            print "  addforeign=name:CUR     Add an account with the currency CUR instead of %s." % self.options['defaultCurrency']
-            print "  currency=CUR            Change the presumed currency of non-foreign accounts to CUR instead of %s." % self.options['defaultCurrency']
-            print "  getexchange=CUR         Update the exchange rate for CUR using Google."
-            print "  setexchange=CUR:value   Manually set the exchange rate for CUR to value."
-            print "  save                    Save current filters as the defaults and commit any other changes to settings."
-            print "  print                   Special command to print the current options in an ugly way."
-            print "  help                    Print this help."
+            print("Argument for -o are typically of the format command=argument, where argument is the new value for the setting.")
+            print("Avoid using -o with any filters, as you may unintentionally overwrite the default filters in the settings.")
+            print("  database=filename       Change the database file used.")
+            print("  maxprint=integer        The maximum number of records to print (deprecated, used only when -N or -U not specified)")
+            print("  allowance=value         Setting the weekly allowance value (set to 0 to disable)")
+            print("  totalvalues=boolean     Whether to display the total value of a record or the delta of each account.")
+            print("  not=x                   Set the character used to negate strings and types to x.")
+            print("  addplace=name           Add a suggested place name.")
+            print("  delplace=name           Remove a suggested place name.")
+            print("  addtype=name            Add a new type of record.")
+            print("  deltype=name            Remove a type of record.")
+            print("  addaccount=name         Add a new account or restore one that has been hidden with 'delaccount'.")
+            print("  delaccount=name         Hide an account in a more persistent way than -C provides.")
+            print("  addforeign=name:CUR     Add an account with the currency CUR instead of %s." % self.options['defaultCurrency'])
+            print("  currency=CUR            Change the presumed currency of non-foreign accounts to CUR instead of %s." % self.options['defaultCurrency'])
+            print("  getexchange=CUR         Update the exchange rate for CUR using Google.")
+            print("  setexchange=CUR:value   Manually set the exchange rate for CUR to value.")
+            print("  save                    Save current filters as the defaults and commit any other changes to settings.")
+            print("  print                   Special command to print the current options in an ugly way.")
+            print("  help                    Print this help.")
             return changed_options
         elif len(args) != 2:
-            print "Options must be changed using command=argument format."
-            print "Use '-o help' for recognized options."
+            print("Options must be changed using command=argument format.")
+            print("Use '-o help' for recognized options.")
             return changed_options
 
         command = args[0]
@@ -278,21 +278,21 @@ class Settings(object):
         if command == 'database':
             old_database = self.database()
             self.set_database(arg)
-            print "Changed database from '%s' to '%s'" % (old_database, self.database())
+            print("Changed database from '%s' to '%s'" % (old_database, self.database()))
             changed_options = True
 
         #   maxprint=integer
         elif command == 'maxprint':
             old_maxprint = self.maxprint()
             self.set_maxprint(arg)
-            print "Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint())
+            print("Changed maxprint from '%s' to '%s'" % (old_maxprint, self.maxprint()))
             changed_options = True
 
         #   allowance=float
         elif command == 'allowance':
             old_allowance = self.allowance()
             self.set_allowance(arg)
-            print "Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance())
+            print("Changed allowance from '%s' to '%s'" % (old_allowance, self.allowance()))
             changed_options = True
 
         #   totalvalues=boolean
@@ -302,7 +302,7 @@ class Settings(object):
                 self.set_total_values(True)
             else:
                 self.set_total_values(False)
-            print "Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values())
+            print("Changed totalvalues from '%s' to '%s'" % (old_total_values, self.total_values()))
             changed_options = True
 
         #   not=x
@@ -310,76 +310,76 @@ class Settings(object):
             valid = True
             old_not = self.not_character()
             if len(arg) != 1:
-                print "NOT character must be a single character"
+                print("NOT character must be a single character")
                 valid = False
             if arg in "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789":
-                print "Alphanumeric characters not recommended for the NOT character"
+                print("Alphanumeric characters not recommended for the NOT character")
                 valid = False
             if valid is True and arg != old_not:
                 self.set_not_character(arg)
-                print "Changed not character from %s to %s" % (old_not, self.not_character())
+                print("Changed not character from %s to %s" % (old_not, self.not_character()))
                 changed_options = True
 
         #   addplace=string
         elif command == 'addplace':
             if self.add_place(arg):
-                print "Added '%s' to places" % arg
+                print("Added '%s' to places" % arg)
                 changed_options = True
             else:
-                print "Place %s already exists" % arg
+                print("Place %s already exists" % arg)
 
         #   delplace=string
         elif command == 'delplace':
             if self.del_place(arg):
-                print "Removed '%s' from places" % arg
+                print("Removed '%s' from places" % arg)
                 changed_options = True
             else:
-                print "Place not found: %s" % arg
+                print("Place not found: %s" % arg)
 
         #   addtype=word
         elif command == 'addtype':
             if self.add_type(arg):
-                print "Added '%s' to types" % arg
+                print("Added '%s' to types" % arg)
                 changed_options = True
             else:
-                print "Type %s already exists" % arg
+                print("Type %s already exists" % arg)
 
         #   deltype=word
         elif command == 'deltype':
             if self.del_type(arg):
-                print "Removed type %s" % arg
+                print("Removed type %s" % arg)
                 changed_options = True
             else:
-                print "Could not remove type %s" % arg
+                print("Could not remove type %s" % arg)
 
         #   addaccount=word
         elif command == 'addaccount':
             if self.add_account(arg):
-                print "Added account %s" % arg
+                print("Added account %s" % arg)
                 changed_options = True
             else:
-                print "Could not add account %s" % arg
+                print("Could not add account %s" % arg)
 
         #   delaccount=word
         elif command == 'delaccount':
             if self.del_account(arg):
-                print "Deleted account %s" % arg
+                print("Deleted account %s" % arg)
                 changed_options = True
             else:
-                print "Could not delete account %s" % arg
+                print("Could not delete account %s" % arg)
 
         elif command == 'addforeign':
             if self.add_foreign(arg):
-                print "Added foreign account %s" % arg
+                print("Added foreign account %s" % arg)
                 changed_options = True
             else:
-                print "Could not add account %s" % arg
+                print("Could not add account %s" % arg)
 
         elif command == 'getexchange':
             if self.set_exchange(arg, self.get_exchange_rate(arg)):
                 changed_options = True
             else:
-                print "Could not set exchange rate"
+                print("Could not set exchange rate")
 
         elif command == 'setexchange':
             try:
@@ -387,18 +387,18 @@ class Settings(object):
                 currency = args[0]
                 rate = float(args[1])
             except:
-                print "Could not parse argument %s" % arg
+                print("Could not parse argument %s" % arg)
             if self.set_exchange(currency, rate):
                 changed_options = True
             else:
-                print "Could not set exchange rate of %s" % currency
+                print("Could not set exchange rate of %s" % currency)
 
         elif command == 'renameaccount':
             # self.rename_account(oldname, newname)
-            print "Cannot rename accounts yet"
+            print("Cannot rename accounts yet")
 
         else:
-            print "Unrecognized command. Use -o help for recognized commands."
+            print("Unrecognized command. Use -o help for recognized commands.")
 
         # If anything changed, this will be true
         return changed_options
@@ -643,8 +643,8 @@ class Settings(object):
         if self.updated_rates is True:
             self.options['historicalRates'][self.TODAY] = self.options['exchangeRates']
         else:
-            print "Exchange rates have not been updated."
-            print "Since they are out of date, they will not be saved as today's rates."
+            print("Exchange rates have not been updated.")
+            print("Since they are out of date, they will not be saved as today's rates.")
 
 
     # --------------------------------------------------------------------------------
@@ -710,7 +710,7 @@ class Settings(object):
         """ Delete a type """
         if expense_type in self.types():
             if expense_type in protected_types():
-                print "Cannot remove protected type"
+                print("Cannot remove protected type")
                 return False
 
             self.options['types'].remove(expense_type)
@@ -729,7 +729,7 @@ class Settings(object):
             self.undel_account(name)
             return True
 
-        print "That account name already exists"
+        print("That account name already exists")
         return False
 
 
@@ -738,10 +738,10 @@ class Settings(object):
         args = args.split(":")
         try:
             if (len(args[1]) != 3 or not args[1].isalpha()):
-                print "%s is not a 3-character currency code" % args[1]
+                print("%s is not a 3-character currency code" % args[1])
                 return False
         except:
-            print "Could not get currency code from %s" % args
+            print("Could not get currency code from %s" % args)
             return False
         name = args[0]
         currency = args[1].upper()
@@ -759,10 +759,10 @@ class Settings(object):
         # Try to get the exchange rate
         rate = self.get_exchange_rate(currency)
         if rate is False:
-            print "Could not get exchange rate. Please set the exchange rate manually."
+            print("Could not get exchange rate. Please set the exchange rate manually.")
             rate = 0.0
 
-        print "Exchange rate set to %f" % rate
+        print("Exchange rate set to %f" % rate)
 
         # Now save the exchange rate for this currency
         self.options['exchangeRates'][currency] = rate
@@ -773,10 +773,10 @@ class Settings(object):
     def set_exchange(self, currency, rate):
         if currency in self.options['exchangeRates'].keys():
             self.options['exchangeRates'][currency] = rate
-            print "Set exchange rate of %s to %f" % (currency, rate)
+            print("Set exchange rate of %s to %f" % (currency, rate))
             return True
 
-        print "There are no accounts with currency %s" % currency
+        print("There are no accounts with currency %s" % currency)
         return False
 
 
@@ -812,5 +812,5 @@ class Settings(object):
 
 
     def save_filters(self):
-        print "Setting default filters: %s" % self.filters_str()
+        print("Setting default filters: %s" % self.filters_str())
         self.save()

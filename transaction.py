@@ -69,7 +69,7 @@ class Transaction(object):
                         acc = arg[0]
                     else:
                         #! Should ask for a new account name and add it
-                        print "Error reading database: Account ID not recognized."
+                        print("Error reading database: Account ID not recognized.")
                     delta = arg[1]
                     self.deltas[acc] = float(delta)
 
@@ -238,7 +238,7 @@ class Transaction(object):
 
     def complete_type(self, text, state):
         """ Return possible types on tab """
-        print self.settings.types().values()
+        print(self.settings.types().values())
         for cmd in self.settings.types().values():
             if cmd.startswith(text):
                 if not state:
@@ -288,18 +288,18 @@ class Transaction(object):
                     input_month = int(date_list[1])
                     input_day = int(date_list[2])
                 else:
-                    print "ERROR: did not understand date"
+                    print("ERROR: did not understand date")
                     continue
 
                 try:
                     self.date = date(input_year, input_month, input_day) # Transaction date
                 except:
-                    print "ERROR: could not interpret %s" % date_string
+                    print("ERROR: could not interpret %s" % date_string)
                     continue
 
                 # Warn if entered date is a long time ago. Might be, e.g., a typo in the year.
                 if (self.settings.TODAY - self.date) > self.settings.ONEWEEK:
-                    print 'WARNING: Date entered is greater than one week ago!'
+                    print('WARNING: Date entered is greater than one week ago!')
                 # Otherwise date stays the same, which will be today if new transaction
 
             # if we got past all the continues above, then the date is OK
@@ -311,10 +311,10 @@ class Transaction(object):
         # Try to complete type on tab
         readline.set_completer(self.complete_type)
 
+        optlist = ""
         for index, expense_type in enumerate(types):
-            optlist = "[%d] %s " % (index, expense_type)
-            print optlist,
-        print
+            optlist += "[%d] %s  " % (index, expense_type)
+        print(optlist)
         prompt = "Type (%s): " % self.type
         answer = raw_input(prompt)
         answer = answer.strip()
@@ -325,7 +325,7 @@ class Transaction(object):
                 if answer in types:
                     self.type = answer
                 else:
-                    print "WARNING: Type not recognized"
+                    print("WARNING: Type not recognized")
                     #! Should abort or retry or something
 
         # Go to special transfer function if deltas not already defined
@@ -342,11 +342,10 @@ class Transaction(object):
 
         # Try to complete destination on tab
         readline.set_completer(self.complete_dest)
-
+        optlist = ""
         for index, place in enumerate(places):
-            optlist = "[%d] %s " % (index, place)
-            print optlist,
-        print
+            optlist += "[%d] %s  " % (index, place)
+        print(optlist)
         prompt = "Places (%s): " % self.dest
         answer = raw_input(prompt)
         answer = answer.strip()
@@ -360,10 +359,10 @@ class Transaction(object):
         #! Can most recent be default? If so, what if I want a null description?
         predictions = self.database.predict_description(
             self.dest, self.type, self.settings.number_to_predict())
+        optlist = ""
         for index, prediction in enumerate(predictions):
-            optlist = "[%d] %s " % (index, prediction)
-            print optlist,
-        print
+            optlist += "[%d] %s  " % (index, prediction)
+        print(optlist)
 
         # Try to complete description on tab
         readline.set_completer(self.complete_desc)
@@ -405,7 +404,7 @@ class Transaction(object):
             self.id = answer
 
         # UID already exists in the record
-        print self.uid
+        print(self.uid)
 
 
     def input_transfer(self):
@@ -419,10 +418,10 @@ class Transaction(object):
         for key in allkeys:
             if self.database.is_printable(key):
                 keys.append(key)
+        optlist = ""
         for index, key in enumerate(keys):
-            optlist = "[%d] %s " % (index, self.settings.account_name(key))
-            print optlist,
-        print
+            optlist += "[%d] %s  " % (index, self.settings.account_name(key))
+        print(optlist)
         prompt = "From: "
         answer = raw_input(prompt)
         answer = answer.strip()
@@ -437,8 +436,8 @@ class Transaction(object):
 
         if (dest in self.settings.foreign_account_keys()
                 or source in self.settings.foreign_account_keys()):
-            print "WARNING: Transfering between different currencies isn't well supported"
-            print "         You will have to edit this record with -e to adjust the values"
+            print("WARNING: Transfering between different currencies isn't well supported")
+            print("         You will have to edit this record with -e to adjust the values")
 
         # Try to complete destination on tab
         readline.set_completer(self.complete_desc)
@@ -465,7 +464,7 @@ class Transaction(object):
             self.id = answer
 
         # UID already exists in the record
-        print self.uid
+        print(self.uid)
 
 
     # EXTRA STUFF FOR GUI

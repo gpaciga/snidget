@@ -42,14 +42,14 @@ def parse_args(argv):
     try:
         opts, args = getopt.getopt(argv, "acbd:e:f:ghino:pqrstuvwx:A:B:C:D:EF:L:N:RS:T:UV:WX:", [])
     except getopt.GetoptError:
-        print "Unrecognized option or bad argument. Use -h to get usage information."
+        print("Unrecognized option or bad argument. Use -h to get usage information.")
         sys.exit(2)
 
     for opt, arg in opts:
 
         if opt == "-a":
             # Print all visible records, no matter how many there are
-            print database.__str__(len(database.records))
+            print(database.__str__(len(database.records)))
 
         elif opt == "-c":
             # Print current balances of all accounts
@@ -58,16 +58,16 @@ def parse_args(argv):
             for acc in settings.accounts().iterkeys():
                 if acc not in settings.deleted_account_keys():
                     if acc in settings.foreign_account_keys():
-                        print "%-15s %12.2f = %12.2f" % \
-                            (settings.account_name(acc), balances[acc],
-                             balances[acc]*settings.exchange(acc))
+                        print("%-15s %12.2f = %12.2f" %
+                              (settings.account_name(acc), balances[acc],
+                               balances[acc]*settings.exchange(acc)))
                         total += balances[acc]*settings.exchange(acc)
                     else:
-                        print "%-15s %12.2s   %12.2f" % \
-                            (settings.account_name(acc), "", balances[acc])
+                        print("%-15s %12.2s   %12.2f" %
+                              (settings.account_name(acc), "", balances[acc]))
                         total += balances[acc]
-            print "%-15s %12.2s   ============" % ("", "")
-            print "%-15s %12.2s   %12.2f" % ("Total", "", total)
+            print("%-15s %12.2s   ============" % ("", ""))
+            print("%-15s %12.2s   %12.2f" % ("Total", "", total))
 
         elif opt == "-b":
             for datapoint in database.integrate_deltas():
@@ -76,7 +76,7 @@ def parse_args(argv):
                 # +1 because we have a column for the total
                 for i in range(0, len(settings.accounts()) + 1):
                     output += "%9.2f " % datapoint[1+i]
-                print output
+                print(output)
 
         elif opt == "-d":
             # Integrate over some number of days, argument required.
@@ -87,10 +87,10 @@ def parse_args(argv):
             try:
                 num_days = int(arg)
             except:
-                print "Invalid option: -d " + arg
+                print("Invalid option: -d " + arg)
             for datapoint in database.integrate(num_days):
                 # datapoint is a (date, float) tuple
-                print "%s %.2f" % datapoint
+                print("%s %.2f" % datapoint)
                 total += float(datapoint[1])
                 num += 1
             ave = total/num if num > 0 else 0
@@ -108,11 +108,11 @@ def parse_args(argv):
 
         elif opt == "-h":
             # Print usage
-            print usage()
+            print(usage())
 
         elif opt == "-i":
             # Print a new record UID
-            print transaction.new_uid()
+            print(transaction.new_uid())
 
         elif opt == "-f":
             if arg == "latex":
@@ -120,9 +120,9 @@ def parse_args(argv):
                 latex.output(__version__, database, settings)
             elif arg == "csv":
                 # Print in CSV
-                print database.__str__(csv=True)
+                print(database.__str__(csv=True))
             else:
-                print "Format '%s' not supported" % (arg)
+                print("Format '%s' not supported" % (arg))
 
         elif opt == "-n":
             # Create a new entry in the database
@@ -136,20 +136,20 @@ def parse_args(argv):
 
         elif opt == "-p":
             # Print the database as it currently stands
-            print database
+            print(database)
 
         elif opt == "-q":
             # Include a running tally of each account
-            print database.__str__(print_running_balances=True)
+            print(database.__str__(print_running_balances=True))
 
         elif opt == "-r":
             # Print recipients
             destsum = 0.0
             for dest in database.balances_by_recipient():
                 destsum += float(dest[1])
-                print "  %-35s %9.2f" % (dest[0], float(dest[1]))
-            print "  ============================================="
-            print "  %35s %9.2f" % (" ", destsum)
+                print("  %-35s %9.2f" % (dest[0], float(dest[1])))
+            print("  =============================================")
+            print("  %35s %9.2f" % (" ", destsum))
 
         elif opt == "-s":
             # Sort records by date
@@ -161,17 +161,17 @@ def parse_args(argv):
             typesum = 0.0
             for expense_type in database.balances_by_type():
                 typesum += float(expense_type[1])
-                print "  %-35s %9.2f" % (expense_type[0], float(expense_type[1]))
-            print "  ============================================="
-            print "  %35s %9.2f" % (" ", typesum)
+                print("  %-35s %9.2f" % (expense_type[0], float(expense_type[1])))
+            print("  =============================================")
+            print("  %35s %9.2f" % (" ", typesum))
 
         elif opt == "-u":
-            print "Updating all exchange rates (but you must save explicitly with -o save!)"
+            print("Updating all exchange rates (but you must save explicitly with -o save!)")
             settings.update_exchanges()
 
         elif opt == "-v":
             # Like -p but print values, not individual accounts
-            print database.__str__(total_value=not settings.total_values())
+            print(database.__str__(total_value=not settings.total_values()))
 
         elif opt == "-w":
             # Integrate over n days, defaults to 7.
@@ -180,11 +180,11 @@ def parse_args(argv):
             num = 0
             for datapoint in database.integrate():
                 # datapoint is a (date, float) tuple
-                print "%s %.2f" % datapoint
+                print("%s %.2f" % datapoint)
                 total += float(datapoint[1])
                 num += 1
             ave = total/num if num > 0 else 0
-            print "# Average: %.2f" % ave
+            print("# Average: %.2f" % ave)
 
         elif opt == "-x":
             # Delete a record by uid

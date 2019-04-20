@@ -660,11 +660,11 @@ class SnidgetGUI(object):
 
 
     def call_delete(self, widget, data):
-        print "Not implemented."
+        print("Not implemented.")
 
 
     def call_download(self, widget, data):
-        print "Not implemented."
+        print("Not implemented.")
 
 
     def call_sort(self, widget, data):
@@ -783,11 +783,11 @@ class SnidgetGUI(object):
             self.treeview.set_tooltip_column(0)
             return
         elif self.display_mode == "Types":
-            print "Don't know how to write table in this display mode"
+            print("Don't know how to write table in this display mode")
         elif self.display_mode == "Recipients":
-            print "Don't know how to write table in this display mode"
+            print("Don't know how to write table in this display mode")
         else:
-            print "Don't know this display mode"
+            print("Don't know this display mode")
 
 
     def cell_value(self, column, cell, model, iter, n):
@@ -815,7 +815,7 @@ class SnidgetGUI(object):
         elif self.display_mode == "Recipients":
             pass
         else:
-            print "Error: display mode not recognized on double click."
+            print("Error: display mode not recognized on double click.")
 
 
     # --------------------------------------------------------------------------
@@ -839,7 +839,7 @@ class SnidgetGUI(object):
             ok = self.dialog_save()
             # We will be quitting if OK, so print the "Saved" message to the terminal
             if ok is True:
-                print "Saved database"
+                print("Saved database")
         # Go ahead and quit unless something happened
         if ok is True:
             gtk.main_quit()

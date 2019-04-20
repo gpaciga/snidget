@@ -10,10 +10,10 @@
 def output(version, database, settings):
     """ Print database as latex table """
 
-    print "\\documentclass{article}"
-    print "\\begin{document}"
-    print "\\title{Expense Report}"
-    print "\\author{Snidget v%s}" % version
+    print("\\documentclass{article}")
+    print("\\begin{document}")
+    print("\\title{Expense Report}")
+    print("\\author{Snidget v%s}" % version)
 
     #! Print balances at beginning of time period
     #! Print balances at end of time period
@@ -35,33 +35,33 @@ def output(version, database, settings):
         start = database.records[0].date
         end = settings.TODAY
 
-    print "\\date{%s to %s}" % (start, end)
-    print "\\maketitle"
+    print("\\date{%s to %s}" % (start, end))
+    print("\\maketitle")
 
     # Print summary of types
-    print "\\section{Total in each Type}"
-    print "  \\begin{tabular}{lr}"
-    print "    \\hline"
-    print "    \\textbf{Type} & \\textbf{Total} \\\\"
-    print "    \\hline"
+    print("\\section{Total in each Type}")
+    print("  \\begin{tabular}{lr}")
+    print("    \\hline")
+    print("    \\textbf{Type} & \\textbf{Total} \\\\")
+    print("    \\hline")
     for expense_type in database.balances_by_type():
-        print "       %-14s & %10s \\\\" % expense_type
-    print "    \\hline"
-    print "  \\end{tabular}"
+        print("       %-14s & %10s \\\\" % expense_type)
+    print("    \\hline")
+    print("  \\end{tabular}")
 
     for expense_type in settings.types():
-        print "\\section{%s}" % expense_type
+        print("\\section{%s}" % expense_type)
         database.filters['types'] = expense_type
-        print "  \\begin{tabular}{lr}"
-        print "    \\hline"
-        print "    \\textbf{Destination} & \\textbf{Total} \\\\"
-        print "    \\hline"
-        print "    \\hline"
+        print("  \\begin{tabular}{lr}")
+        print("    \\hline")
+        print("    \\textbf{Destination} & \\textbf{Total} \\\\")
+        print("    \\hline")
+        print("    \\hline")
         for dest in database.balances_by_recipient():
             name = dest[0].replace("&", "\&")
             value = dest[1]
-            print "         %-30s & %10s \\\\" % (name, value)
-        print "    \\hline"
-        print "  \\end{tabular}"
+            print("         %-30s & %10s \\\\" % (name, value))
+        print("    \\hline")
+        print("  \\end{tabular}")
 
-    print "\\end{document}"
+    print("\\end{document}")

@@ -31,7 +31,7 @@ class Database(object):
             record_file = open(self.filename, 'r')
         except IOError:
             # Only open with write permissions if file does not exist yet
-            print "Creating database file %s" % self.filename
+            print("Creating database file %s" % self.filename)
             # For some reason r+ doesn't work to create the file
             # and have to open for write to create, close, and open for read
             record_file = open(self.filename, 'w')
@@ -62,7 +62,7 @@ class Database(object):
             try:
                 total_value = self.settings.total_values()
             except:
-                print "Unable to find user settings"
+                print("Unable to find user settings")
                 total_value = False
 
         self.apply_filters()
@@ -208,7 +208,7 @@ class Database(object):
         try:
             new.input_values()
         except (KeyboardInterrupt, SystemExit):
-            print "\nCaught Keyboard Interrupt. This record has not been added."
+            print("\nCaught Keyboard Interrupt. This record has not been added.")
         else:
             self.add(new)
             #! Would be nice to append this new record to the original database file
@@ -605,7 +605,7 @@ class Database(object):
                     elif record.visible:
                         record.visible = not flag
             else:
-                print 'Account %s does not exist' % account
+                print('Account %s does not exist' % account)
 
 
     def filter_date(self, mindate, maxdate=None, flag=True):
@@ -726,7 +726,7 @@ class Database(object):
                     allowed_keys.append(self.settings.account_key(account))
                 return bool(name in allowed_keys)
 
-            print "Error: account %s not recognized in is_printable" % name
+            print("Error: account %s not recognized in is_printable" % name)
             return False
 
         if self.filters['columns'] in ["None", "none"]:
