@@ -1,10 +1,9 @@
+from __future__ import print_function
 import gtk
 from matplotlib.backends.backend_gtk import FigureCanvasGTK as FigureCanvas
 from matplotlib.figure import Figure
 
-import snidget
-
-def plotwindow():
+def plot_window(database):
     # set up the window
     win = gtk.Window()
     #win.connect("destroy", lambda x: gtk.main_quit())
@@ -24,7 +23,7 @@ def plotwindow():
     vbox.pack_start(canvas)
 
     # get the data
-    weekly_integration = snidget.database.integrate(n=7)
+    weekly_integration = database.integrate(num_days=7)
     dates = []
     deltas = []
     for datum in weekly_integration:
@@ -42,4 +41,3 @@ def plotwindow():
     # show
     fig.canvas.draw()
     win.show_all()
-

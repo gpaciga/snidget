@@ -2,3 +2,5 @@
 *.pkl
 *.txt
 
+.scannerwork
+sonar-project.properties

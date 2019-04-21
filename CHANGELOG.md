@@ -5,7 +5,10 @@
 * better plotter would be nice
 * manual editing of historical exchange rates would be useful if they are ever used
 * add account setting to only count a fraction of the value (e.g. 50 percent for shared accounts or 0 to exclude entirely from total)
-* refactor the csv stuff, should support multiple print options so csv and -q can be used simultaneously 
+* refactor the csv stuff, should support multiple print options so csv and -q can be used simultaneously
+
+## v4.3.0
+* 2019-04-20 - significant refactoring
 
 ## v4.2.1
 * 2019-04-01 - bug fixes highlighted by lgtm.com
@@ -27,7 +30,7 @@
 * 2012-09-12 - Slightly modified format of -r and -t tables
 * 2013-11-01 - Old exchange rates are saved when updated. Historical rates not used for anything.
 * 2015-08-08 - Fixed exchange rates to use a proper/better API
-	
+
 ## v4.0(beta)
 * 2010-10-29 - Added save database functionality to the GUI
 * 2010-10-29 - Added not character as a user option
@@ -35,7 +38,7 @@
 * 2010-10-29 - Added negate option for type filters
 
 ## v4.0(alpha)
-* 2010-08-01 - started writing new GUI using gtk+     
+* 2010-08-01 - started writing new GUI using gtk+
 
 ## v3.5(alpha)
 * 2010-02-10 - Can use '!' notation to remove records matching a string (Aim to do this for types as well)
@@ -45,7 +48,7 @@
 * 2010-03    - New accounts can be added, and accounts can be deleted, without breaking the database
 * 2010-03-26 - Wrote special function for making a transfer between accounts
 * 2010-03-28 - Added mechanism for predictive input of destinations and descriptions
-* 2010-06-23 - Added tab completion for dest and desc, though with minor bugs 
+* 2010-06-23 - Added tab completion for dest and desc, though with minor bugs
 
 ## v3.4
 * 2009-07-26 - Added back and forward options, enabling undoing just one filter
